@@ -18,21 +18,20 @@ def get_paginated_reviews_by_course(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order
+        sort_order=sort_order,
+        user_id = user_id
     )
 
     for review in reviews:
         votes = review_select_upvotes(review["id"])
         review["votes"] = votes
-        review["user_vote"] = user_voted_review(user_id=user_id, review_id=review["id"])
-
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
 
     total_results = reviews_select_count(dept, course_number, tags=tags)
     tags = review_select_tags(department=dept, course_number=course_number, tags=tags)
-
+    print(reviews)
     return {
         "items": reviews,
         "total_results": total_results,
@@ -56,22 +55,21 @@ def get_paginated_reviews_by_professor(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order
+        sort_order=sort_order,
+        user_id = user_id
     )
 
     for review in reviews:
         votes = review_select_upvotes(review["id"])
         review["votes"] = votes
         review["comments"] = review_select_comments(review["id"])
-        review["user_vote"] = user_voted_review(user_id=user_id, review_id=review["id"])
-
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
 
     total_results = reviews_select_count(professor_id=professor_id, tags=tags)
     tags = review_select_tags(professor_id=professor_id, tags=tags)
-
+    print(reviews)
     return {
         "items": reviews,
         "total_results": total_results,
