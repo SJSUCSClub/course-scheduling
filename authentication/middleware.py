@@ -22,12 +22,10 @@ class TokenRefreshMiddleware:
             if not response:
                 refresh_token = request.COOKIES.get("refresh_token")
                 if not refresh_token:
-                    return JsonResponse({"error": "No refresh token"}, status=401)
+                    return JsonResponse({"error": "Invalid Access Token and no refresh token. Should Redirect to Login Screen."}, status=401)
                 response_data = refresh(refresh_token)
                 if response_data == None:
-                    print("error, invalid access and refresh token. redirecting")
-                    print(request.build_absolute_uri(reverse("authorize")))
-                    return HttpResponseRedirect(request.build_absolute_uri(reverse("authorize")))
+                    return JsonResponse({"error": "Invalid Access and Refresh Token. Should Redirect to Login Screen."}, status=401)
 
                 new_access_token = response_data.get("access_token")
                 new_id_token = response_data.get("id_token")

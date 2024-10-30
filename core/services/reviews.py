@@ -31,7 +31,6 @@ def get_paginated_reviews_by_course(
 
     total_results = reviews_select_count(dept, course_number, tags=tags)
     tags = review_select_tags(department=dept, course_number=course_number, tags=tags)
-    print(reviews)
     return {
         "items": reviews,
         "total_results": total_results,
@@ -69,7 +68,6 @@ def get_paginated_reviews_by_professor(
 
     total_results = reviews_select_count(professor_id=professor_id, tags=tags)
     tags = review_select_tags(professor_id=professor_id, tags=tags)
-    print(reviews)
     return {
         "items": reviews,
         "total_results": total_results,
