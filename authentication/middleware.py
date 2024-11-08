@@ -1,9 +1,11 @@
 import requests
 import time
 from django.http import JsonResponse
+from django.urls import reverse
 from authentication.utils.refreshToken import refresh
+from django.shortcuts import redirect
 import os
-
+from django.http import HttpResponseRedirect
 
 class TokenRefreshMiddleware:
     def __init__(self, get_response):
@@ -20,12 +22,10 @@ class TokenRefreshMiddleware:
             if not response:
                 refresh_token = request.COOKIES.get("refresh_token")
                 if not refresh_token:
-                    return JsonResponse({"error": "No refresh token"}, status=401)
+                    return JsonResponse({"error": "Invalid Access Token and no refresh token. Should Redirect to Login Screen."}, status=401)
                 response_data = refresh(refresh_token)
                 if response_data == None:
-                    return JsonResponse(
-                        {"error": "Invalid access and refresh token"}, status=401
-                    )
+                    return JsonResponse({"error": "Invalid Access and Refresh Token. Should Redirect to Login Screen."}, status=401)
 
                 new_access_token = response_data.get("access_token")
                 new_id_token = response_data.get("id_token")

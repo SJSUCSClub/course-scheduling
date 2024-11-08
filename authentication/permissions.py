@@ -15,9 +15,7 @@ class AuthenticatedPermission(BasePermission):
             # if not request.user.is_authenticated:
             #     raise PermissionDenied('User is not logged in')
             if request.path.startswith("/google/"):
-                access_token = request.COOKIES.get('access_token')
-                response = requests.get(f'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}')
-                token_info = response.json()
+                token_info = checkToken(request.COOKIES.get('access_token'))
             else:
                 token_info = request.token_res
 
@@ -35,8 +33,22 @@ class AuthenticatedPermission(BasePermission):
         
 class NotAuthenticatedPermission(BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated and request.COOKIES.get('access_token'):
-            return False
-        return True
+        access_token = request.COOKIES.get('access_token')
+        if not access_token:
+            return True
+        res = checkToken(access_token)
+        return 'error' in res
     
 
+def checkToken(access_token):
+    try:
+        response = requests.get(
+            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}"
+        )
+        if response.status_code == 200:
+            response = response.json()
+            return response
+        return None
+    except:
+        print(f"Error during token validation")
+        return None

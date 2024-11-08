@@ -54,7 +54,6 @@ def delete_review(request, review_id):
 @permission_classes([AuthenticatedPermission])
 @try_response
 def review_query(request, review_id):
-    print(request.method)
     if request.method == "PUT":
         return put_review(request, review_id)
     elif request.method == "DELETE":
