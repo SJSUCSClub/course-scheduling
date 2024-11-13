@@ -68,7 +68,7 @@ def GoogleAuthorize(request: HttpRequest):
 
 @api_view(["GET"])
 @permission_classes([NotAuthenticatedPermission])
-def oauth2callback(request):
+def oauth2callback(request: HttpRequest):
     # get the frontend_redirect_uri from the cookie
     frontend_redirect_uri = request.COOKIES.get("frontend_redirect_uri")
     if not frontend_redirect_uri:
@@ -103,7 +103,7 @@ def oauth2callback(request):
     first_name = user_info.get("given_name")
     last_name = user_info.get("family_name")
     if not email.endswith("@sjsu.edu"):
-        return JsonResponse({"error": "Unauthorized email address"}, status=403)
+        return redirect(os.getenv("FRONTEND_URL") + "/loginfailed")
     id = email.removesuffix("@sjsu.edu")
 
     user, created = User.objects.get_or_create(email=email, username=id)
