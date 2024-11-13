@@ -1,4 +1,6 @@
 import { LastNameDisplay } from '@/app/(main)/professors/(page)/@name/lastname';
+import { ProfessorsSearchResponse } from '@/types';
+import fetcher from '@/utils/fetcher';
 import SWRConfigProvider from '@/wrappers/swr-config';
 import { Metadata } from 'next';
 
@@ -6,14 +8,28 @@ export const metadata: Metadata = {
   title: 'Professors',
 };
 
-export default function Page() {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+export default async function Page() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-  const components = [];
+  const components: JSX.Element[] = [];
+  const initialResults = await Promise.all(
+    letters.map(async (letter) => {
+      return (await fetcher(
+        process.env.BASE_API_URL +
+          `/core/professors/search?startswith=${letter}&limit=3`,
+      )) as ProfessorsSearchResponse;
+    }),
+  );
 
-  for (const letter of letters) {
-    components.push(<LastNameDisplay startswith={letter} key={letter} />);
-  }
+  letters.forEach((letter, index) => {
+    components.push(
+      <LastNameDisplay
+        startswith={letter}
+        key={letter}
+        initialResults={initialResults[index]}
+      />,
+    );
+  });
   return (
     <>
       <h1 className="pb-md pt-xl max-lg:text-h2-mobile lg:text-h2-desktop">
