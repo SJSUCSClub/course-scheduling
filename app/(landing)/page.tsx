@@ -15,7 +15,7 @@ import { titlingGothicFB } from '../fonts';
 export default function Page() {
   return (
     <main className="relative">
-      <header className="mx-auto flex w-full max-w-content-width items-center justify-between gap-xl bg-background px-lg py-md">
+      <header className="mx-auto flex w-full max-w-content-width items-center justify-between gap-xl px-lg py-md">
         <ul className="flex w-full flex-wrap items-center justify-center gap-lg">
           <li>
             <nav className="flex">
