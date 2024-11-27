@@ -3,23 +3,47 @@ import { Card, LinkBtn } from '@/components/atoms';
 import { NavSearchBar } from '@/components/molecules';
 import Image from 'next/image';
 import SplineNext from '@splinetool/react-spline/next';
-import localFont from 'next/font/local';
 import {
   IdentificationIcon,
   MagnifyingGlassIcon,
   Square2StackIcon,
 } from '@heroicons/react/24/solid';
-
-const titlingGothicFB = localFont({
-  src: '../fonts/TitlingGothicFB.woff2',
-  display: 'swap',
-});
+import { AuthBtn, ProfileBtn } from '@/components/molecules';
+import SessionWrapper from '@/wrappers/session-provider';
+import { titlingGothicFB } from '../fonts';
 
 export default function Page() {
   return (
     <main className="relative">
+      <header className="mx-auto flex w-full max-w-content-width items-center justify-between gap-xl bg-background px-lg py-md">
+        <ul className="flex w-full flex-wrap items-center justify-center gap-lg">
+          <li>
+            <nav className="flex">
+              <LinkBtn href="/courses" variant="tertiary">
+                Courses
+              </LinkBtn>
+              <LinkBtn href="/professors" variant="tertiary">
+                Professors
+              </LinkBtn>
+              <LinkBtn href="/compare" variant="tertiary">
+                Compare
+              </LinkBtn>
+            </nav>
+          </li>
+          <li>
+            <nav className="flex gap-x-sm">
+              <SessionWrapper>
+                <ProfileBtn />
+              </SessionWrapper>
+              <SessionWrapper>
+                <AuthBtn />
+              </SessionWrapper>
+            </nav>
+          </li>
+        </ul>
+      </header>
       <section className="mx-auto w-full max-w-content-width px-md py-xxl">
-        <Card className="flex items-center justify-center gap-[3rem] overflow-visible bg-[rgb(var(--color-background)/0.85)] backdrop-blur-lg max-lg:flex-col max-lg:px-xl max-lg:py-xl lg:px-[56px] lg:py-[56px]">
+        <div className="flex items-center justify-center gap-[3rem] overflow-visible max-lg:flex-col max-lg:px-xl max-lg:pb-xl max-lg:pt-md lg:px-[56px] lg:py-[56px]">
           <div className="flex flex-col gap-lg max-lg:items-center">
             <div className="flex flex-col gap-sm max-lg:items-center">
               <Image src={logo} alt="logo" width={60} height={60} />
@@ -45,7 +69,7 @@ export default function Page() {
             }}
             scene="https://prod.spline.design/zxtbNi7bvatFum9j/scene.splinecode"
           />
-        </Card>
+        </div>
         <div className="flex flex-wrap gap-md pb-[3.5rem] pt-md max-lg:flex-col">
           <LinkBtn
             variant="tertiary"

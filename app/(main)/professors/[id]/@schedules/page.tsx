@@ -49,7 +49,7 @@ export default function Page({ params }: { params: { id: string } }) {
           />
         ))}
       </div>
-      {size !== pages || isLoading || isValidating ? (
+      {(pages > 0 && size !== pages) || isLoading || isValidating ? (
         <div className="flex w-full justify-center pb-md">
           <Btn
             className="gap-md"

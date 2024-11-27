@@ -453,7 +453,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
             </p>
 
             {/* Tags */}
-            {props.tags.length > 0 ? (
+            {props.tags.length > 0 && !props.tags.every((tag) => tag === '') ? (
               <div
                 className={cn('flex min-w-min flex-wrap gap-md text-neutral', {
                   'pb-lg': isShownInteractions,

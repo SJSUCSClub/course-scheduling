@@ -1,3 +1,4 @@
+import { titlingGothicFB } from '@/app/fonts';
 import { Card } from '@/components/atoms';
 import { DepartmentsResponse } from '@/types/core/departments';
 import { Metadata } from 'next';
@@ -34,8 +35,10 @@ export default async function Page() {
 
   return (
     <>
-      <h1 className="pb-md pt-xl max-lg:text-h2-mobile lg:text-h2-desktop">
-        Courses <span className="text-primary">by Department</span>
+      <h1
+        className={`pb-md pt-xl ${titlingGothicFB.className} max-lg:text-[1.5rem] lg:text-[2rem]`}
+      >
+        Department
       </h1>
       <div className="flex flex-col gap-[20px]">
         {components.map(({ letter, departments }) => (
