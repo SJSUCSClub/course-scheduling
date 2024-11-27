@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { Footer } from '@/components/organisms';
 import { cookies } from 'next/headers';
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
-
-const inter = Inter({ subsets: ['latin'] });
+import { inter } from './fonts';
 
 export const metadata: Metadata = {
   title: {

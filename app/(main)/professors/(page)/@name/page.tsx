@@ -1,4 +1,5 @@
 import { LastNameDisplay } from '@/app/(main)/professors/(page)/@name/lastname';
+import { titlingGothicFB } from '@/app/fonts';
 import { ProfessorsSearchResponse } from '@/types';
 import fetcher from '@/utils/fetcher';
 import SWRConfigProvider from '@/wrappers/swr-config';
@@ -16,7 +17,7 @@ export default async function Page() {
     letters.map(async (letter) => {
       return (await fetcher(
         process.env.BASE_API_URL +
-          `/core/professors/search?startswith=${letter}&limit=3`,
+          `/core/professors/search?startswith=${letter}&limit=9`,
       )) as ProfessorsSearchResponse;
     }),
   );
@@ -32,8 +33,10 @@ export default async function Page() {
   });
   return (
     <>
-      <h1 className="pb-md pt-xl max-lg:text-h2-mobile lg:text-h2-desktop">
-        Professors <span className="text-primary">by Last Name</span>
+      <h1
+        className={`pb-md pt-xl ${titlingGothicFB.className} max-lg:text-[1.5rem] lg:text-[2rem]`}
+      >
+        Professors
       </h1>
       <div className="flex flex-col">
         <SWRConfigProvider>
