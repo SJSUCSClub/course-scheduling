@@ -18,13 +18,14 @@ def get_paginated_reviews_by_course(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order,
-        user_id = user_id
+        sort_order=sort_order
     )
 
     for review in reviews:
         votes = review_select_upvotes(review["id"])
         review["votes"] = votes
+        review["user_vote"] = user_voted_review(user_id=user_id, review_id=review["id"])
+
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
@@ -54,14 +55,15 @@ def get_paginated_reviews_by_professor(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order,
-        user_id = user_id
+        sort_order=sort_order
     )
 
     for review in reviews:
         votes = review_select_upvotes(review["id"])
         review["votes"] = votes
         review["comments"] = review_select_comments(review["id"])
+        review["user_vote"] = user_voted_review(user_id=user_id, review_id=review["id"])
+
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None

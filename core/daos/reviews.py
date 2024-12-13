@@ -28,8 +28,7 @@ def reviews_select(
     limit: int = None,
     page: int = None,
     sort_order: str = "DESC",
-    order_by: str = "created_at",
-    user_id: str = None
+    order_by: str = "created_at"
 ):
     """
     Select reviews from the database with any of the given filters
@@ -52,29 +51,13 @@ def reviews_select(
     limit = args.pop("limit")
     sort_order = args.pop("sort_order")
     order_by = args.pop("order_by")
-    user_id = args.pop("user_id")
-    query = f"""
-        SELECT r.*, 
-        u.name AS reviewer_name, 
-        u.username AS reviewer_username, 
-        p.id AS professor_id, 
-        p.name AS professor_name, 
-        p.email AS professor_email, 
-        CASE 
-            WHEN urc.upvote IS TRUE THEN TRUE 
-            ELSE NULL 
-        END AS is_upvoted,
-        CASE 
-            WHEN urc.upvote IS FALSE THEN TRUE 
-            ELSE NULL 
-        END AS is_downvoted
-
+    query = """
+        SELECT r.*, u.name AS reviewer_name, u.username AS reviewer_username, p.id AS professor_id, p.name AS professor_name, p.email AS professor_email
         FROM reviews r
         LEFT JOIN users u ON r.user_id = u.id
         INNER JOIN users p ON r.professor_id = p.id
-        LEFT JOIN user_review_critique urc ON urc.review_id = r.id AND urc.user_id = %s
     """
-    
+
     if order_by == "upvotes":
         query = sort_reviews_by_likes(query, sort_order, args)
     else:
@@ -82,10 +65,8 @@ def reviews_select(
         query += f" ORDER BY r.{order_by} {sort_order}"
     if page and limit:
         query += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
+    ret = fetchall(query, *list(filter(lambda x: x is not None, args.values())))
 
-    params = list(filter(lambda x: x is not None, args.values()))
-    params.insert(0, user_id)
-    ret = fetchall(query, *params)
     for el in ret:
         el["tags"] = process_tags(el["tags"])
     return ret
