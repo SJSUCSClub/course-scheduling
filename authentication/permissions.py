@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied
 from authentication.exceptions import InternalServerError
 from rest_framework.permissions import BasePermission
+from django.db import connection
 import requests
 User = get_user_model()
 
@@ -39,7 +40,20 @@ class NotAuthenticatedPermission(BasePermission):
         res = checkToken(access_token)
         return 'error' in res
     
-
+class AdminPermission(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        user_id = request.user.email.removesuffix("@sjsu.edu")
+        query = """
+            SELECT 1 FROM admins WHERE user_id = %s
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query, [user_id])
+            result = cursor.fetchone()
+        
+        return result is not None
+    
 def checkToken(access_token):
     try:
         response = requests.get(
