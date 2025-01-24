@@ -6,6 +6,7 @@ from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDeni
 from authentication.exceptions import InternalServerError
 from rest_framework.permissions import BasePermission
 from django.db import connection
+from core.daos import fetchone
 import requests
 User = get_user_model()
 
@@ -48,10 +49,7 @@ class AdminPermission(BasePermission):
         query = """
             SELECT 1 FROM admins WHERE user_id = %s
         """
-        with connection.cursor() as cursor:
-            cursor.execute(query, [user_id])
-            result = cursor.fetchone()
-        
+        result = fetchone(query,(user_id,))
         return result is not None
     
 def checkToken(access_token):
