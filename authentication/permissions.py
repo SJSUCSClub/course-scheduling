@@ -16,11 +16,10 @@ class AuthenticatedPermission(BasePermission):
             #so they cant just take the tokens and use them when not logged in (i dont have a good way to test this so i'm going to leave this commented for now)
             # if not request.user.is_authenticated:
             #     raise PermissionDenied('User is not logged in')
-            if request.path.startswith("/google/"):
+            if request.path.startswith("/google/") or request.path.startswith("/admin/"):
                 token_info = checkToken(request.COOKIES.get('access_token'))
             else:
                 token_info = request.token_res
-
             email = token_info.get('email')
             if not email:
                 raise InternalServerError()
@@ -47,7 +46,7 @@ class AdminPermission(BasePermission):
             return False
         user_id = request.user.email.removesuffix("@sjsu.edu")
         query = """
-            SELECT 1 FROM admins WHERE user_id = %s
+            SELECT 1 FROM admins WHERE user_id = %s AND admin_role = 'Administrator'
         """
         result = fetchone(query,(user_id,))
         return result is not None
