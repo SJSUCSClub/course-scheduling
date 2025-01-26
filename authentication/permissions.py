@@ -38,7 +38,19 @@ class NotAuthenticatedPermission(BasePermission):
         if not access_token:
             return True
         res = checkToken(access_token)
-        return 'error' in res
+        print(res)
+        return 'error' in res or ""
+    
+class ModeratorPermission(BasePermission):
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        user_id = request.user.email.removesuffix("@sjsu.edu")
+        query = """
+            SELECT 1 FROM admins WHERE user_id = %s
+        """
+        result = fetchone(query,(user_id,))
+        return result is not None
     
 class AdminPermission(BasePermission):
     def has_permission(self, request, view):

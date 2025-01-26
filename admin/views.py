@@ -1,10 +1,16 @@
 from rest_framework.decorators import api_view, permission_classes
-from authentication.permissions import AuthenticatedPermission, AdminPermission
+from authentication.permissions import AuthenticatedPermission, AdminPermission, ModeratorPermission
 from django.http import JsonResponse
-from core.views.utils import validate_user, validate_body
+from core.views.utils import (
+    validate_user, 
+    validate_body,
+    validate_page_limit
+)
 from admin.services.admins import (
     is_admin,
-    admin_manage_moderator
+    admin_manage_moderator,
+    get_paginated_flagged_reviews,
+    manage_flagged_review
 )
 
 
@@ -17,14 +23,23 @@ def verify_view(request):
 
     
 @api_view(["GET"])
-@permission_classes([AuthenticatedPermission,AdminPermission])
+@permission_classes([AuthenticatedPermission,ModeratorPermission])
 def flagged_reviews_view(request):
-    return
+    json_data = get_paginated_flagged_reviews(
+        flag_status=request.GET.get("status") or "Pending",
+        **validate_page_limit(request),
+    )
+
+    return JsonResponse(json_data)
 
 @api_view(["POST"])
-@permission_classes([AuthenticatedPermission,AdminPermission])
+@permission_classes([AuthenticatedPermission,ModeratorPermission])
 def manage_review_view(request,review_id):
-    return
+    results = manage_flagged_review(
+        review_id=review_id,
+        action = request.data["action"]
+    )
+    return JsonResponse(results)
 
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission,AdminPermission])

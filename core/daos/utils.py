@@ -1,7 +1,6 @@
 from typing import Union, Literal
 from django.db import connection
 
-
 def to_where(
     join: Union[Literal["AND"], Literal["OR"]] = "AND",
     prefix: bool = True,
@@ -56,15 +55,18 @@ def fetchone_as_dict(query: str, *args):
 
 
 def insert(table_name: str, data: dict):
-    with connection.cursor() as cursor:
-        columns = ", ".join(data.keys())
-        placeholders = ", ".join(["%s"] * len(data))
-        cursor.execute(
-            f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})",
-            list(data.values()),
-        )
-        rows_changed = cursor.rowcount
-        return {"message": f"{rows_changed} row(s) were changed"}
+    try:
+        with connection.cursor() as cursor:
+            columns = ", ".join(data.keys())
+            placeholders = ", ".join(["%s"] * len(data))
+            cursor.execute(
+                f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})",
+                list(data.values()),
+            )
+            rows_changed = cursor.rowcount
+            return {"message": f"{rows_changed} row(s) were changed"}
+    except Exception as e:
+        return {"error": f"Error: {str(e)}"}
 
 
 def update(table_name: str, data: dict, where: dict):
