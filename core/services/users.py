@@ -47,6 +47,15 @@ def get_existing_review(user_id, data):
         },
     )
 
+def check_flag_immunity(review_id: int):
+    review = get(
+        "reviews",
+        {
+            "id": review_id,
+        },
+    )
+    flag_immune_until = review[0]["flag_immune_until"]
+    return flag_immune_until > datetime.now()
 
 def insert_review(user_id, data):
     return insert(

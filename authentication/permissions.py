@@ -38,30 +38,33 @@ class NotAuthenticatedPermission(BasePermission):
         if not access_token:
             return True
         res = checkToken(access_token)
-        print(res)
         return 'error' in res or ""
     
-class ModeratorPermission(BasePermission):
-    def has_permission(self, request, view):
+class BaseAdminPermission(BasePermission):
+    def get_user_id(self, request):
         if not request.user or not request.user.is_authenticated:
-            return False
-        user_id = request.user.email.removesuffix("@sjsu.edu")
-        query = """
-            SELECT 1 FROM admins WHERE user_id = %s
-        """
-        result = fetchone(query,(user_id,))
+            return None
+        return request.user.email.removesuffix("@sjsu.edu")
+
+    def is_admin(self, user_id, role=None):
+        query = "SELECT 1 FROM admins WHERE user_id = %s"
+        params = (user_id,)
+
+        if role:
+            query += " AND admin_role = %s"
+            params += (role,)
+        result = fetchone(query, *params)
         return result is not None
     
-class AdminPermission(BasePermission):
+class ModeratorPermission(BaseAdminPermission):
     def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
-        user_id = request.user.email.removesuffix("@sjsu.edu")
-        query = """
-            SELECT 1 FROM admins WHERE user_id = %s AND admin_role = 'Administrator'
-        """
-        result = fetchone(query,(user_id,))
-        return result is not None
+        user_id = self.get_user_id(request)
+        return user_id and self.is_admin(user_id)
+
+class AdminPermission(BaseAdminPermission):
+    def has_permission(self, request, view):
+        user_id = self.get_user_id(request)
+        return user_id and self.is_admin(user_id, role="Administrator")
     
 def checkToken(access_token):
     try:

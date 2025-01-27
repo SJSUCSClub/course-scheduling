@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from core.daos.utils import (
     fetchone, 
-    fetchone_as_dict, 
     fetchall, 
     insert, 
     delete, 
@@ -57,23 +56,12 @@ def flagged_reviews_select(
     return fetchall(query_reviews, *list(filter(lambda x: x is not None, args.values())))
 
 def remove_flagged_review(review_id: int):
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    update(
-        "flag_reviews",
-        {
-            "status": "Approved",
-        },
-        {"review_id": review_id},
-    )
-    return update(
+    return delete(
         "reviews",
         {
-            "deleted_at": current_time,
-            "flag_immune_until": current_time
+            "id": review_id,
         },
-        {"id": review_id},
     )
-
 def keep__flagged_review(review_id: int):
     immune_until = (datetime.now() + timedelta(days=6*30)).strftime('%Y-%m-%d %H:%M:%S')
     update(
@@ -87,7 +75,6 @@ def keep__flagged_review(review_id: int):
         "reviews",
         {
             "flag_immune_until": immune_until,
-            "deleted_at": None
         },
         {"id": review_id},
     )
