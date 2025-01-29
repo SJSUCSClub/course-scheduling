@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied
 from authentication.exceptions import InternalServerError
 from rest_framework.permissions import BasePermission
+from django.db import connection
+from core.daos import fetchone
 import requests
 User = get_user_model()
 
@@ -14,11 +16,10 @@ class AuthenticatedPermission(BasePermission):
             #so they cant just take the tokens and use them when not logged in (i dont have a good way to test this so i'm going to leave this commented for now)
             # if not request.user.is_authenticated:
             #     raise PermissionDenied('User is not logged in')
-            if request.path.startswith("/google/"):
+            if request.path.startswith("/google/") or request.path.startswith("/admin/"):
                 token_info = checkToken(request.COOKIES.get('access_token'))
             else:
                 token_info = request.token_res
-
             email = token_info.get('email')
             if not email:
                 raise InternalServerError()
@@ -37,9 +38,34 @@ class NotAuthenticatedPermission(BasePermission):
         if not access_token:
             return True
         res = checkToken(access_token)
-        return 'error' in res
+        return 'error' in res or ""
     
+class BaseAdminPermission(BasePermission):
+    def get_user_id(self, request):
+        if not request.user or not request.user.is_authenticated:
+            return None
+        return request.user.email.removesuffix("@sjsu.edu")
 
+    def is_admin(self, user_id, role=None):
+        query = "SELECT 1 FROM admins WHERE user_id = %s"
+        params = (user_id,)
+
+        if role:
+            query += " AND admin_role = %s"
+            params += (role,)
+        result = fetchone(query, *params)
+        return result is not None
+    
+class ModeratorPermission(BaseAdminPermission):
+    def has_permission(self, request, view):
+        user_id = self.get_user_id(request)
+        return user_id and self.is_admin(user_id)
+
+class AdminPermission(BaseAdminPermission):
+    def has_permission(self, request, view):
+        user_id = self.get_user_id(request)
+        return user_id and self.is_admin(user_id, role="Administrator")
+    
 def checkToken(access_token):
     try:
         response = requests.get(

@@ -10,6 +10,7 @@ from core.services.users import (
     update_review,
     insert_comment,
     update_comment,
+    check_flag_immunity,
     insert_flag,
     update_flag,
     insert_vote
@@ -105,6 +106,9 @@ def comment_query(request):
 def post_flagged_review(request):
     user_id = validate_user(request)
     data = validate_body(request)
+    flag_immunity = check_flag_immunity(data["review_id"])
+    if flag_immunity:
+        return JsonResponse({"message": "This review has already been checked by the admins so it cannot be flagged at this time."}, status=409)
     results = insert_flag(user_id,data)
     return JsonResponse(results, safe=False)
 
