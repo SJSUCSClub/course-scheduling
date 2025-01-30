@@ -352,7 +352,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
                   {props.title}
                 </LinkBtn>
                 <p className="text-right text-small-lg font-bold uppercase text-neutral">
-                  {props.updatedAt ? 'Updated at' : null}
+                  {props.updatedAt ? 'Edited ' : null}
                   {props.updatedAt
                     ? dayjs(props.updatedAt).format('MMM D, YYYY')
                     : props.createdAt
