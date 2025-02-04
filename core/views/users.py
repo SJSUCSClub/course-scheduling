@@ -36,12 +36,16 @@ def post_review(request):
     if existing_review:
         return JsonResponse({"message": "You have already posted a review for this course professor pair."}, status=400)
     results = insert_review(user_id, data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 def put_review(request, review_id):
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_review(user_id, review_id, data)
+    results = update_review(user_id, review_id, **data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 
@@ -68,6 +72,8 @@ def post_comment(request):
     user_id = validate_user(request)
     data = validate_body(request)
     results = insert_comment(user_id,data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 
@@ -77,6 +83,8 @@ def put_comment(request):
     user_id = validate_user(request)
     data = validate_body(request)
     results = update_comment(user_id,comment_id,review_id,data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 
@@ -110,6 +118,8 @@ def post_flagged_review(request):
     if flag_immunity:
         return JsonResponse({"message": "This review has already been checked by the admins so it cannot be flagged at this time."}, status=409)
     results = insert_flag(user_id,data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 
@@ -119,6 +129,8 @@ def put_flag(request):
     user_id = validate_user(request)
     data = validate_body(request)
     results = update_flag(user_id, flag_id, review_id, data)
+    if not results:
+        return JsonResponse({"message": "Content contains inappropriate language."}, status=400)
     return JsonResponse(results, safe=False)
 
 

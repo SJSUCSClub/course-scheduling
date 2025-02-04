@@ -8,6 +8,7 @@ from core.daos import (
     user_select_voted_reviews,
     user_voted_review,
 )
+from core.services.utils import content_check
 from core.views.utils import format_tags
 
 
@@ -58,6 +59,8 @@ def check_flag_immunity(review_id: int):
     return flag_immune_until > datetime.now()
 
 def insert_review(user_id, data):
+    if content_check(data["content"]):
+        return None
     return insert(
         "reviews",
         {
@@ -76,26 +79,20 @@ def insert_review(user_id, data):
     )
 
 
-def update_review(user_id, review_id, data):
-    return update(
-        "reviews",
-        {
-            "professor_id": data["professor_id"],
-            "course_number": data["course_number"],
-            "department": data["department"],
-            "content": data["content"],
-            "quality": data["quality"],
-            "ease": data["ease"],
-            "grade": data["grade"],
-            "take_again": data["take_again"],
-            "tags": format_tags(data["tags"]),
-            "is_user_anonymous": data["is_user_anonymous"],
-        },
-        {"user_id": user_id, "id": review_id},
-    )
+def update_review(user_id, review_id, **data):
+    if data.get("content") and content_check(data["content"]):
+        return None
+    allowed_keys = ["tags", "content", "quality", "ease", "grade", "take_again", "is_user_anonymous"]
+    data = {key: value for key, value in data.items() if key in allowed_keys}
+    if "tags" in data:
+        data["tags"] = format_tags(data.get("tags", []))
+    data["updated_at"] = datetime.now()
+    return update("reviews",data,{"user_id": user_id, "id": review_id})
 
 
 def insert_comment(user_id, data):
+    if content_check(data["content"]):
+        return None
     return insert(
         "comments",
         {
@@ -107,6 +104,8 @@ def insert_comment(user_id, data):
 
 
 def update_comment(user_id, comment_id, review_id, data):
+    if content_check(data["content"]):
+        return None
     return update(
         "comments",
         {"content": data["content"], "updated_at": datetime.now()},
@@ -115,6 +114,8 @@ def update_comment(user_id, comment_id, review_id, data):
 
 
 def insert_flag(user_id, data):
+    if content_check(data["reason"]):
+        return None
     return insert(
         "flag_reviews",
         {
@@ -126,6 +127,8 @@ def insert_flag(user_id, data):
 
 
 def update_flag(user_id, flag_id, review_id, data):
+    if content_check(data["reason"]):
+        return None
     return update(
         "flag_reviews",
         {"reason": data["reason"]},
