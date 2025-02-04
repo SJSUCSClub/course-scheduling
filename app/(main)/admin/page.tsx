@@ -1,6 +1,8 @@
 import { Review } from '@/components/organisms';
+import Link from 'next/link';
 
 export default function Page() {
+  // TODO - check authorized
   return (
     <main>
       <section className="mx-auto w-full max-w-content-width px-md pb-lg pt-xxl">
@@ -11,6 +13,9 @@ export default function Page() {
           <h2 className="pb-xl text-neutral max-lg:text-h5-mobile lg:text-h5-desktop">
             Review user reports and moderate content.
           </h2>
+        </div>
+        <div>
+          <Link href={'/admin/manage'}>Manage Admins</Link>
         </div>
         <div className="flex flex-1 flex-col items-stretch gap-md pb-lg">
           <Review
