@@ -2,7 +2,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied
 from authentication.exceptions import InternalServerError
 from rest_framework.permissions import BasePermission
 from django.db import connection
@@ -19,18 +19,22 @@ class AuthenticatedPermission(BasePermission):
             if request.path.startswith("/google/") or request.path.startswith("/admin/"):
                 token_info = checkToken(request.COOKIES.get('access_token'))
             else:
+                if not hasattr(request, "token_res"):
+                    raise AuthenticationFailed("No access token.")
                 token_info = request.token_res
             email = token_info.get('email')
             if not email:
-                raise InternalServerError()
+                raise AuthenticationFailed("Invalid token: email missing")
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 raise NotFound('User not found')
             request.user = user
             return True
-        except:
-            raise InternalServerError()
+        except (AuthenticationFailed, NotFound) as e:
+            raise e
+        except Exception as e:
+            raise AuthenticationFailed("Authentication error.")
         
 class NotAuthenticatedPermission(BasePermission):
     def has_permission(self, request, view):
