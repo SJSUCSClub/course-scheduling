@@ -32,10 +32,10 @@ export interface AdminFlaggedReviewsResponse {
     // flags
     flags: {
       user_id: string;
+      review_id: string;
       created_at: string;
       reason: string;
       status: 'Pending' | 'Approved' | 'Declined';
-      review_content: string;
     }[];
   }[];
 }
