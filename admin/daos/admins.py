@@ -76,7 +76,7 @@ def flagged_reviews_select_counts(
     status: str = None,
 ) -> int:
     args = locals()
-    query = "SELECT COUNT(*) FROM flag_reviews" + to_where(**args)
+    query = "SELECT COUNT(DISTINCT review_id) FROM flag_reviews" + to_where(**args)
     return fetchone(query, *list(filter(lambda x: x is not None, args.values())))[0]
 
 
@@ -89,7 +89,7 @@ def flagged_reviews_select(status: str = None, limit: int = None, page: int = No
     query_reviews = (
         "SELECT r.*, u.name AS reviewer_name, u.username AS reviewer_username, p.id AS professor_id, p.name AS professor_name, p.email AS professor_email, JSON_AGG(fr) AS flags "
         + "FROM reviews r "
-        + "LEFT JOIN flag_reviews fr ON fr.review_id = r.id "
+        + "LEFT JOIN (SELECT * FROM flag_reviews inner_fr LEFT JOIN users inner_u ON inner_fr.user_id = inner_u.id) AS fr ON fr.review_id = r.id "
         + "LEFT JOIN users u ON r.user_id = u.id "
         + "LEFT JOIN users p ON r.professor_id = p.id "
         + to_where(**args, table_name="fr")
