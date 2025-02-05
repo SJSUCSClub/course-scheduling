@@ -7,7 +7,7 @@ from authentication.permissions import (
 from django.http import JsonResponse
 from core.views.utils import validate_user, validate_body, validate_page_limit, try_response
 from admin.services.admins import (
-    is_admin,
+    check_admin,
     admin_manage_moderator,
     get_paginated_flagged_reviews,
     manage_flagged_review,
@@ -20,8 +20,7 @@ from admin.services.admins import (
 @try_response
 def verify_view(request):
     user_id = validate_user(request)
-    response_data = {"isAdmin": is_admin(user_id)}
-    return JsonResponse(response_data)
+    return JsonResponse(check_admin(user_id))
 
 
 @api_view(["GET"])

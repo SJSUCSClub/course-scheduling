@@ -3,8 +3,8 @@ from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update
 
 
 def admin_select(
-    sort_by: str,
-    sort_order: str,
+    sort_by: str = "user_id",
+    sort_order: str = "ASC",
     query: str = None,
     user_id: str = None,
     limit: int = None,
@@ -22,7 +22,7 @@ def admin_select(
     """
 
     sql_query = "SELECT * FROM admins"
-    if query is not None:
+    if query:  # query is not None and len(query) > 0
         sql_query += " WHERE similarity(user_id, %s) > 0.2 " + to_where(
             prefix=False, user_id=user_id
         )
@@ -31,7 +31,7 @@ def admin_select(
     sql_query += f" ORDER BY {sort_by} {sort_order}"
     if page and limit:
         sql_query += f" LIMIT {limit} OFFSET {(page-1)*limit}"
-    return fetchall(sql_query, *[item for item in [user_id, query] if item is not None])
+    return fetchall(sql_query, *[item for item in [query, user_id] if item])
 
 
 def admin_select_counts(
