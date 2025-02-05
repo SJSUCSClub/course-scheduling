@@ -2,7 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from authentication.permissions import AuthenticatedPermission
 from django.http import JsonResponse
 from core.daos.utils import insert, delete, update, get
-from .utils import try_response, validate_body, validate_user, format_tags
+from .utils import try_response, validate_body, validate_user
+from core.decorators import check_profanity
 from core.services.users import (
     get_user_profile,
     get_existing_review,
@@ -15,6 +16,7 @@ from core.services.users import (
     update_flag,
     insert_vote
 )
+
 
 @api_view(["GET"])
 @permission_classes([AuthenticatedPermission])
@@ -29,6 +31,7 @@ def user_profile(request):
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def post_review(request):
     user_id = validate_user(request)
     data = validate_body(request)
@@ -41,7 +44,7 @@ def post_review(request):
 def put_review(request, review_id):
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_review(user_id, review_id, data)
+    results = update_review(user_id, review_id, **data)
     return JsonResponse(results, safe=False)
 
 
@@ -54,6 +57,7 @@ def delete_review(request, review_id):
 @api_view(["PUT", "DELETE"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def review_query(request, review_id):
     if request.method == "PUT":
         return put_review(request, review_id)
@@ -64,6 +68,7 @@ def review_query(request, review_id):
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def post_comment(request):
     user_id = validate_user(request)
     data = validate_body(request)
@@ -93,6 +98,7 @@ def delete_comment(request):
 @api_view(["PUT", "DELETE"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def comment_query(request):
     if request.method == "PUT":
         return put_comment(request)
@@ -103,6 +109,7 @@ def comment_query(request):
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def post_flagged_review(request):
     user_id = validate_user(request)
     data = validate_body(request)
@@ -135,6 +142,7 @@ def delete_flag(request):
 @api_view(["PUT", "DELETE"])
 @permission_classes([AuthenticatedPermission])
 @try_response
+@check_profanity
 def flagged_query(request):
     if request.method == "PUT":
         return put_flag(request)

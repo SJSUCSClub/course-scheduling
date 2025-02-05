@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpRequest
 import traceback
 import sys
 import json
+from better_profanity import profanity
 
 def validate_page_limit(request: HttpRequest):
     page = request.GET.get("page") or DEFAULT_PAGE
@@ -38,3 +39,6 @@ def format_tags(tags):
     tags = str(tags)
     tags = tags.replace("[","{").replace("]","}").replace("'","\"")
     return tags
+
+def content_check(content: str):
+    return profanity.contains_profanity(content)
