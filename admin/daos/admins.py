@@ -83,12 +83,16 @@ def flagged_reviews_select(status: str = None, limit: int = None, page: int = No
     args = locals()
     page = args.pop("page")
     limit = args.pop("limit")
+    # guaranteed unique id per review, thus guaranteed unique name, username, ...
+    # for that review
     query_reviews = (
-        "SELECT r.*, JSON_AGG(fr) AS flags "
+        "SELECT r.*, u.name AS reviewer_name, u.username AS reviewer_username, p.id AS professor_id, p.name AS professor_name, p.email AS professor_email, JSON_AGG(fr) AS flags "
         + "FROM reviews r "
         + "LEFT JOIN flag_reviews fr ON fr.review_id = r.id "
+        + "LEFT JOIN users u ON r.user_id = u.id "
+        + "LEFT JOIN users p ON r.professor_id = p.id "
         + to_where(**args, table_name="fr")
-        + " GROUP BY r.id"
+        + " GROUP BY (r.id, u.name, u.username, p.id, p.name, p.email)"
     )
 
     if page and limit:
