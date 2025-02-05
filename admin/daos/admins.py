@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update
+from core.daos.reviews import process_tags
 
 
 def admin_select(
@@ -97,9 +98,11 @@ def flagged_reviews_select(status: str = None, limit: int = None, page: int = No
 
     if page and limit:
         query_reviews += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
-    return fetchall(
-        query_reviews, *list(filter(lambda x: x is not None, args.values()))
-    )
+    ret = fetchall(query_reviews, *list(filter(lambda x: x is not None, args.values())))
+
+    for el in ret:
+        el["tags"] = process_tags(el["tags"])
+    return ret
 
 
 def remove_flagged_review(review_id: int):
