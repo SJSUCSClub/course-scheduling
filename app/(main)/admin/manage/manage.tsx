@@ -41,7 +41,9 @@ export const Manage: React.FC = () => {
 
   // handle add
   const [error, setError] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const handleAdd = async () => {
+    setIsLoading(true);
     await fetch('/django/admin/manage-moderator', {
       method: 'POST',
       headers: {
@@ -53,8 +55,8 @@ export const Manage: React.FC = () => {
         action: true,
       }),
     }).then((resp) => {
-      console.log(resp.status);
-      setError(resp.status == 500);
+      setIsLoading(false);
+      setError(resp.status != 200);
     });
     mutate(data);
   };
@@ -96,7 +98,9 @@ export const Manage: React.FC = () => {
           className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
         >
           <Card className="flex w-[300px] flex-col p-md">
-            {!error ? (
+            {isLoading ? (
+              <p>Adding...</p>
+            ) : !error ? (
               <p>Moderator added successfully.</p>
             ) : (
               <p>Failed to add moderator.</p>
@@ -113,7 +117,7 @@ export const Manage: React.FC = () => {
         <div className="flex w-full flex-col pb-2 text-text">
           <Card>
             <menu>
-              <li className="flex flex-row border-b-2 px-4 py-2 font-bold">
+              <li className="flex flex-row border-b-2 border-border px-4 py-2 font-bold">
                 <p className="w-1/3">User ID</p>
                 <p className="w-1/3">Role</p>
                 <p className="w-1/3">Created At</p>
@@ -149,7 +153,7 @@ export const Manage: React.FC = () => {
                     </dialog>
                     <li
                       key={idx}
-                      className="flex flex-row border-b-2 px-4 py-2 animation last:border-b-0 hover:bg-[rgb(var(--color-primary)/0.15)] focus:bg-[rgb(var(--color-primary)/0.15)]"
+                      className="flex flex-row border-b-2 border-border px-4 py-2 animation last:border-b-0 hover:bg-[rgb(var(--color-primary)/0.15)] focus:bg-[rgb(var(--color-primary)/0.15)]"
                     >
                       <p className="w-1/3">{val.user_id}</p>
                       <p className="w-1/3">{val.admin_role}</p>

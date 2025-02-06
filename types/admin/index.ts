@@ -36,6 +36,11 @@ export interface AdminFlaggedReviewsResponse {
       created_at: string;
       reason: string;
       status: 'Pending' | 'Approved' | 'Declined';
+      // user attributes
+      username: string | null;
+      name: string;
+      email: string;
+      is_professor: boolean;
     }[];
   }[];
 }
