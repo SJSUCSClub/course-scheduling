@@ -2,7 +2,6 @@ from core.constants import DEFAULT_PAGE, DEFAULT_PAGE_LIMIT
 from django.http import JsonResponse, HttpRequest
 import traceback
 import sys
-import json
 from better_profanity import profanity
 
 def validate_page_limit(request: HttpRequest):
@@ -16,9 +15,9 @@ def try_response(fn):
     def wrapper(*args, **kwargs):
         try:
             return fn(*args, **kwargs)
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc(), file=sys.stderr)
-            return JsonResponse({"message": e.args}, status=500)
+            return JsonResponse({"message": "Bad request"}, status=400)
 
     return wrapper
 
