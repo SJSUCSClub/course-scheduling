@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from authentication.permissions import AuthenticatedPermission
 from django.http import JsonResponse
 from core.daos.utils import insert, delete, update, get
-from .utils import try_response, validate_body, validate_user
+from .utils import try_response, validate_body, validate_user, check_flag_immunity
 from core.decorators import check_profanity
 from core.services.users import (
     get_user_profile,
@@ -11,10 +11,11 @@ from core.services.users import (
     update_review,
     insert_comment,
     update_comment,
-    check_flag_immunity,
-    insert_flag,
-    update_flag,
-    insert_vote
+    insert_review_flag,
+    update_review_flag,
+    insert_vote,
+    insert_comment_flag,
+    update_comment_flag
 )
 
 
@@ -113,23 +114,24 @@ def comment_query(request):
 def post_flagged_review(request):
     user_id = validate_user(request)
     data = validate_body(request)
-    flag_immunity = check_flag_immunity(data["review_id"])
+    review = get("reviews", {"id": data["review_id"]})[0]
+    flag_immunity = check_flag_immunity(review)
     if flag_immunity:
         return JsonResponse({"message": "This review has already been checked by the admins so it cannot be flagged at this time."}, status=409)
-    results = insert_flag(user_id,data)
+    results = insert_review_flag(user_id,data)
     return JsonResponse(results, safe=False)
 
 
-def put_flag(request):
+def put_review_flag(request):
     review_id = request.GET.get("review_id")
     flag_id = request.GET.get("flag_id")
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_flag(user_id, flag_id, review_id, data)
+    results = update_review_flag(user_id, flag_id, review_id, data)
     return JsonResponse(results, safe=False)
 
 
-def delete_flag(request):
+def delete_review_flag(request):
     review_id = request.GET.get("review_id")
     flag_id = request.GET.get("flag_id")
     user_id = validate_user(request)
@@ -143,11 +145,11 @@ def delete_flag(request):
 @permission_classes([AuthenticatedPermission])
 @try_response
 @check_profanity
-def flagged_query(request):
+def flagged_review_query(request):
     if request.method == "PUT":
-        return put_flag(request)
+        return put_review_flag(request)
     elif request.method == "DELETE":
-        return delete_flag(request)
+        return delete_review_flag(request)
 
 
 @api_view(["POST"])
@@ -158,3 +160,46 @@ def post_vote(request):
     data = validate_body(request)
     results = insert_vote(user_id,data)
     return JsonResponse(results, safe=False)
+
+@api_view(["POST"])
+@permission_classes([AuthenticatedPermission])
+@try_response
+@check_profanity
+def post_flagged_comment(request):
+    user_id = validate_user(request)
+    data = validate_body(request)
+    comment = get("comments", {"id": data["comment_id"]})[0]
+    flag_immunity = check_flag_immunity(comment)
+    if flag_immunity:
+        return JsonResponse({"message": "This comment has already been checked by the admins so it cannot be flagged at this time."}, status=409)
+    results = insert_comment_flag(user_id,data)
+    return JsonResponse(results, safe=False)
+
+def put_comment_flag(request):
+    comment_id = request.GET.get("comment_id")
+    flag_id = request.GET.get("flag_id")
+    user_id = validate_user(request)
+    data = validate_body(request)
+    results = update_comment_flag(user_id, flag_id, comment_id, data)
+    return JsonResponse(results, safe=False)
+
+
+def delete_comment_flag(request):
+    comment_id = request.GET.get("comment_id")
+    flag_id = request.GET.get("flag_id")
+    user_id = validate_user(request)
+    results = delete(
+        "flag_reviews", {"user_id": user_id, "comment_id": comment_id, "id": flag_id}
+    )
+    return JsonResponse(results, safe=False)
+
+@api_view(["PUT", "DELETE"])
+@permission_classes([AuthenticatedPermission])
+@try_response
+@check_profanity
+def flagged_comments_query(request):
+    if request.method == "PUT":
+        return put_comment_flag(request)
+    elif request.method == "DELETE":
+        return delete_comment_flag(request)
+

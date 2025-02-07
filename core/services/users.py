@@ -47,15 +47,6 @@ def get_existing_review(user_id, data):
         },
     )
 
-def check_flag_immunity(review_id: int):
-    review = get(
-        "reviews",
-        {
-            "id": review_id,
-        },
-    )
-    flag_immune_until = review[0]["flag_immune_until"]
-    return flag_immune_until > datetime.now()
 
 def insert_review(user_id, data):
     return insert(
@@ -104,7 +95,7 @@ def update_comment(user_id, comment_id, review_id, data):
     )
 
 
-def insert_flag(user_id, data):
+def insert_review_flag(user_id, data):
     return insert(
         "flag_reviews",
         {
@@ -115,10 +106,10 @@ def insert_flag(user_id, data):
     )
 
 
-def update_flag(user_id, flag_id, review_id, data):
+def update_review_flag(user_id, flag_id, review_id, data):
     return update(
         "flag_reviews",
-        {"reason": data["reason"]},
+        {"reason": data["reason"], "updated_at": datetime.now()},
         {"user_id": user_id, "review_id": review_id, "id": flag_id},
     )
 
@@ -141,3 +132,24 @@ def insert_vote(user_id, data):
         "user_review_critique",
         {"user_id": user_id, "review_id": data["review_id"], "upvote": data["vote"]},
     )
+
+
+def insert_comment_flag(user_id, data):
+    return insert(
+        "flag_comments",
+        {
+            "user_id": user_id,
+            "comment_id": data["comment_id"],
+            "reason": data["reason"],
+        }
+    )
+
+
+def update_comment_flag(user_id, flag_id, comment_id, data):
+    return update(
+        "flag_comments",
+        {"reason": data["reason"], "updated_at": datetime.now()},
+        {"user_id": user_id, "comment_id": comment_id, "id": flag_id},
+    )
+
+

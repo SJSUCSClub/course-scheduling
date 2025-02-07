@@ -45,8 +45,10 @@ urlpatterns = [
     path("users/reviews", views.post_review),
     path("users/comments", views.post_comment),
     path("users/flagged_reviews", views.post_flagged_review),
+    path("users/flagged_comments", views.post_flagged_comment),
     path("users/vote", views.post_vote),
     path("users/reviews/<int:review_id>", views.review_query),
     path("users/reviews/comments", views.comment_query),
-    path("users/reviews/flagged_reviews", views.flagged_query),
+    path("users/reviews/flagged_reviews", views.flagged_review_query),
+    path("users/comments/flagged_comments", views.flagged_comments_query)
 ]
