@@ -55,18 +55,15 @@ def fetchone_as_dict(query: str, *args):
 
 
 def insert(table_name: str, data: dict):
-    try:
-        with connection.cursor() as cursor:
-            columns = ", ".join(data.keys())
-            placeholders = ", ".join(["%s"] * len(data))
-            cursor.execute(
-                f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})",
-                list(data.values()),
-            )
-            rows_changed = cursor.rowcount
-            return {"message": f"{rows_changed} row(s) were changed"}
-    except Exception as e:
-        return {"error": f"Error: {str(e)}"}
+    with connection.cursor() as cursor:
+        columns = ", ".join(data.keys())
+        placeholders = ", ".join(["%s"] * len(data))
+        cursor.execute(
+            f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})",
+            list(data.values()),
+        )
+        rows_changed = cursor.rowcount
+        return {"message": f"{rows_changed} row(s) were changed"}
 
 
 def update(table_name: str, data: dict, where: dict):

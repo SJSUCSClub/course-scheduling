@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from authentication.permissions import AuthenticatedPermission
 from django.http import JsonResponse
-from core.daos.utils import insert, delete, update, get
+from core.daos.utils import delete, get
 from .utils import try_response, validate_body, validate_user, check_flag_immunity
 from core.decorators import check_profanity
 from core.services.users import (
@@ -73,22 +73,22 @@ def review_query(request, review_id):
 def post_comment(request):
     user_id = validate_user(request)
     data = validate_body(request)
-    results = insert_comment(user_id,data)
+    review_id, content = data["review_id"], data["content"]
+    results = insert_comment(user_id, review_id, content)
     return JsonResponse(results, safe=False)
 
 
 def put_comment(request):
-    review_id = request.GET.get("review_id")
-    comment_id = request.GET.get("comment_id")
+    review_id, comment_id = request.GET.get("review_id"), request.GET.get("comment_id")
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_comment(user_id,comment_id,review_id,data)
+    content = data["content"]
+    results = update_comment(user_id,comment_id,review_id,content)
     return JsonResponse(results, safe=False)
 
 
 def delete_comment(request):
-    review_id = request.GET.get("review_id")
-    comment_id = request.GET.get("comment_id")
+    review_id, comment_id = request.GET.get("review_id"), request.GET.get("comment_id")
     user_id = validate_user(request)
     results = delete(
         "comments", {"user_id": user_id, "review_id": review_id, "id": comment_id}
@@ -114,26 +114,26 @@ def comment_query(request):
 def post_flagged_review(request):
     user_id = validate_user(request)
     data = validate_body(request)
-    review = get("reviews", {"id": data["review_id"]})[0]
+    review_id, reason = data['review_id'], data['reason']
+    review = get("reviews", {"id": review_id})[0]
     flag_immunity = check_flag_immunity(review)
     if flag_immunity:
         return JsonResponse({"message": "This review has already been checked by the admins so it cannot be flagged at this time."}, status=409)
-    results = insert_review_flag(user_id,data)
+    results = insert_review_flag(user_id, review_id, reason)
     return JsonResponse(results, safe=False)
 
 
 def put_review_flag(request):
-    review_id = request.GET.get("review_id")
-    flag_id = request.GET.get("flag_id")
+    review_id, flag_id = request.GET.get("review_id"), request.GET.get("flag_id")
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_review_flag(user_id, flag_id, review_id, data)
+    reason = data['reason']
+    results = update_review_flag(user_id, flag_id, review_id, reason)
     return JsonResponse(results, safe=False)
 
 
 def delete_review_flag(request):
-    review_id = request.GET.get("review_id")
-    flag_id = request.GET.get("flag_id")
+    review_id, flag_id = request.GET.get("review_id"), request.GET.get("flag_id")
     user_id = validate_user(request)
     results = delete(
         "flag_reviews", {"user_id": user_id, "review_id": review_id, "id": flag_id}
@@ -158,7 +158,8 @@ def flagged_review_query(request):
 def post_vote(request):
     user_id = validate_user(request)
     data = validate_body(request)
-    results = insert_vote(user_id,data)
+    review_id, vote = data["review_id"], data["vote"]
+    results = insert_vote(user_id, review_id, vote)
     return JsonResponse(results, safe=False)
 
 @api_view(["POST"])
@@ -168,25 +169,25 @@ def post_vote(request):
 def post_flagged_comment(request):
     user_id = validate_user(request)
     data = validate_body(request)
-    comment = get("comments", {"id": data["comment_id"]})[0]
+    comment_id, reason = data['comment_id'], data['reason']
+    comment = get("comments", {"id": comment_id})[0]
     flag_immunity = check_flag_immunity(comment)
     if flag_immunity:
         return JsonResponse({"message": "This comment has already been checked by the admins so it cannot be flagged at this time."}, status=409)
-    results = insert_comment_flag(user_id,data)
+    results = insert_comment_flag(user_id, comment_id, reason)
     return JsonResponse(results, safe=False)
 
 def put_comment_flag(request):
-    comment_id = request.GET.get("comment_id")
-    flag_id = request.GET.get("flag_id")
+    comment_id, flag_id = request.GET.get("comment_id"), request.GET.get("flag_id")
     user_id = validate_user(request)
     data = validate_body(request)
-    results = update_comment_flag(user_id, flag_id, comment_id, data)
+    reason = data['reason']
+    results = update_comment_flag(user_id, flag_id, comment_id, reason)
     return JsonResponse(results, safe=False)
 
 
 def delete_comment_flag(request):
-    comment_id = request.GET.get("comment_id")
-    flag_id = request.GET.get("flag_id")
+    comment_id, flag_id = request.GET.get("comment_id"), request.GET.get("flag_id")
     user_id = validate_user(request)
     results = delete(
         "flag_reviews", {"user_id": user_id, "comment_id": comment_id, "id": flag_id}

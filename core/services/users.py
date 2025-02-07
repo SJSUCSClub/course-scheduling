@@ -76,79 +76,69 @@ def update_review(user_id, review_id, **data):
     return update("reviews",data,{"user_id": user_id, "id": review_id})
 
 
-def insert_comment(user_id, data):
+def insert_comment(user_id, review_id, content):
     return insert(
         "comments",
         {
             "user_id": user_id,
-            "review_id": data["review_id"],
-            "content": data["content"],
-        },
-    )
-
-
-def update_comment(user_id, comment_id, review_id, data):
-    return update(
-        "comments",
-        {"content": data["content"], "updated_at": datetime.now()},
-        {"user_id": user_id, "review_id": review_id, "id": comment_id},
-    )
-
-
-def insert_review_flag(user_id, data):
-    return insert(
-        "flag_reviews",
-        {
-            "user_id": user_id,
-            "review_id": data["review_id"],
-            "reason": data["reason"],
-        },
-    )
-
-
-def update_review_flag(user_id, flag_id, review_id, data):
-    return update(
-        "flag_reviews",
-        {"reason": data["reason"], "updated_at": datetime.now()},
-        {"user_id": user_id, "review_id": review_id, "id": flag_id},
-    )
-
-
-def insert_vote(user_id, data):
-    if data["vote"] == None:
-        return delete(
-            "user_review_critique", {"user_id": user_id, "review_id": data["review_id"]}
-        )
-    check = get(
-        "user_review_critique", {"user_id": user_id, "review_id": data["review_id"]}
-    )
-    if check:
-        return update(
-            "user_review_critique",
-            {"upvote": data["vote"]},
-            {"user_id": user_id, "review_id": data["review_id"]},
-        )
-    return insert(
-        "user_review_critique",
-        {"user_id": user_id, "review_id": data["review_id"], "upvote": data["vote"]},
-    )
-
-
-def insert_comment_flag(user_id, data):
-    return insert(
-        "flag_comments",
-        {
-            "user_id": user_id,
-            "comment_id": data["comment_id"],
-            "reason": data["reason"],
+            "review_id": review_id,
+            "content": content,
         }
     )
 
 
-def update_comment_flag(user_id, flag_id, comment_id, data):
+def update_comment(user_id, comment_id, review_id, content):
+    return update(
+        "comments",
+        {"content": content, "updated_at": datetime.now()},
+        {"user_id": user_id, "review_id": review_id, "id": comment_id}
+    )
+
+
+def insert_review_flag(user_id, review_id, reason):
+    return insert(
+        "flag_reviews",
+        {
+            "user_id": user_id,
+            "review_id": review_id,
+            "reason": reason
+        }
+    )
+
+
+def update_review_flag(user_id, flag_id, review_id, reason):
+    return update(
+        "flag_reviews",
+        {"reason": reason, "updated_at": datetime.now()},
+        {"user_id": user_id, "review_id": review_id, "id": flag_id}
+    )
+
+
+def insert_vote(user_id, review_id, vote):
+    where_condition = {"user_id": user_id, "review_id": review_id}
+    if vote == None:
+        return delete("user_review_critique", where_condition)
+    check = get("user_review_critique", where_condition)
+    if check:
+        return update("user_review_critique", {"upvote": vote}, where_condition)
+    return insert("user_review_critique", {**where_condition, "upvote": vote})
+
+
+def insert_comment_flag(user_id, comment_id, reason):
+    return insert(
+        "flag_comments",
+        {
+            "user_id": user_id,
+            "comment_id": comment_id,
+            "reason": reason,
+        }
+    )
+
+
+def update_comment_flag(user_id, flag_id, comment_id, reason):
     return update(
         "flag_comments",
-        {"reason": data["reason"], "updated_at": datetime.now()},
+        {"reason": reason, "updated_at": datetime.now()},
         {"user_id": user_id, "comment_id": comment_id, "id": flag_id},
     )
 

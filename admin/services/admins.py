@@ -11,9 +11,11 @@ from admin.daos.admins import (
 import math
 
 
-def is_admin(user_id):
-    cnt = admin_select_counts(user_id=user_id)[0]["count"]
-    return cnt > 0
+def check_admin(user_id: str):
+    matches = admin_select(user_id=user_id)
+    if len(matches) == 1:
+        return {"isAdmin": True, "role": matches[0]["admin_role"]}
+    return {"isAdmin": False}
 
 
 def admin_manage_moderator(data):
