@@ -8,16 +8,16 @@ import getEvaluation from '@/utils/get-evaluation';
 import SessionProvider, { useSession } from '@/wrappers/session-provider';
 import SWRConfigProvider from '@/wrappers/swr-config';
 import {
+  ChatBubbleOvalLeftIcon,
+  FlagIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
-  FlagIcon,
-  ChatBubbleOvalLeftIcon,
 } from '@heroicons/react/24/outline';
 import {
-  HandThumbDownIcon as HandThumbDownIconSolid,
-  HandThumbUpIcon as HandThumbUpIconSolid,
   ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid,
   ChevronRightIcon,
+  HandThumbDownIcon as HandThumbDownIconSolid,
+  HandThumbUpIcon as HandThumbUpIconSolid,
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
@@ -49,6 +49,7 @@ interface Props {
     downvotes: number;
   };
   isShownInteractions?: boolean;
+  className?: string;
 }
 
 export const Review: React.FC<Props> = (props) => (
@@ -214,6 +215,7 @@ const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
 
 export const ReviewWithoutProviders: React.FC<Props> = ({
   isShownInteractions = true,
+  className = '',
   ...props
 }) => {
   const session = useSession();
@@ -337,7 +339,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
   editParams.set('is_user_anonymous', props.userId === null ? 'true' : 'false');
 
   return (
-    <Card className="p-sm">
+    <Card className={cn('p-sm', className)}>
       <div className="flex gap-xl max-lg:flex-col">
         <div className="flex-1 p-md">
           <div>
