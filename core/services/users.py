@@ -20,6 +20,7 @@ def get_user_profile(user_id: str):
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
+    print(reviews)
     flagged_reviews = user_select_flagged_reviews(user_id)
     for review in flagged_reviews:
         review["votes"] = review_select_upvotes(review["id"])
@@ -116,10 +117,10 @@ def update_review_flag(user_id, flag_id, review_id, reason):
 
 def insert_vote(user_id, review_id, vote):
     where_condition = {"user_id": user_id, "review_id": review_id}
-    if vote == None:
+    if vote is None:
         return delete("user_review_critique", where_condition)
-    check = get("user_review_critique", where_condition)
-    if check:
+    existing_vote = get("user_review_critique", where_condition)
+    if existing_vote:
         return update("user_review_critique", {"upvote": vote}, where_condition)
     return insert("user_review_critique", {**where_condition, "upvote": vote})
 

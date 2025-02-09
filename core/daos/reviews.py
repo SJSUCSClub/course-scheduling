@@ -1,5 +1,5 @@
 from django.db import connection
-from core.daos.utils import to_where, fetchall, fetchone, get
+from core.daos.utils import to_where, fetchall, fetchone, fetchone_as_dict, get
 from typing import List, Dict, Union, Literal
 
 
@@ -106,6 +106,18 @@ def review_select_upvotes(review_id):
 def review_select_comments(review_id):
     return get("comments", {"review_id": review_id})
 
+
+def review_select_one(review_id):
+    query = """
+        SELECT r.*, u.username AS reviewer_username
+        FROM reviews r
+        LEFT JOIN users u ON r.user_id = u.id
+        WHERE r.id = %s
+    """
+    ret = fetchone_as_dict(query,review_id)
+    if "tags" in ret:
+        ret["tags"] = process_tags(ret["tags"])
+    return ret
 
 def review_select_tags(
     **kwargs,

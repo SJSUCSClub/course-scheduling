@@ -5,6 +5,7 @@ from core.daos import (
     review_select_tags,
     review_select_comments,
     user_voted_review,
+    review_select_one
 )
 
 
@@ -81,6 +82,12 @@ def get_paginated_reviews_by_professor(
 
 def get_review_comments(review_id: str):
     return review_select_comments(review_id)
+
+def get_review(review_id: str):
+    review = review_select_one(review_id)
+    if review["is_user_anonymous"]:
+        review["user_id"] = None
+    return review
 
 
 def get_paginated_reviews_with_comments_by_course(
