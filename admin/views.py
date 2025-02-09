@@ -10,7 +10,9 @@ from admin.services.admins import (
     check_admin,
     admin_manage_moderator,
     get_paginated_flagged_reviews,
+    get_paginated_flagged_comments,
     manage_flagged_review,
+    manage_flagged_comment,
     get_admins_list,
 )
 
@@ -35,6 +37,16 @@ def flagged_reviews_view(request):
     return JsonResponse(json_data)
 
 
+@api_view(["GET"])
+@permission_classes([AuthenticatedPermission, ModeratorPermission])
+@try_response
+def flagged_comments_view(request):
+    json_data = get_paginated_flagged_comments(
+        flag_status=request.GET.get("status") or "Pending",
+        **validate_page_limit(request),
+    )
+    return JsonResponse(json_data)
+
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission, ModeratorPermission])
 @try_response
@@ -42,6 +54,12 @@ def manage_review_view(request, review_id):
     results = manage_flagged_review(review_id=review_id, action=request.data["action"])
     return JsonResponse(results)
 
+@api_view(["POST"])
+@permission_classes([AuthenticatedPermission, ModeratorPermission])
+@try_response
+def manage_comment_view(request, comment_id):
+    results = manage_flagged_comment(comment_id=comment_id, action=request.data["action"])
+    return JsonResponse(results)
 
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission, AdminPermission])

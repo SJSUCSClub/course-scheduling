@@ -109,7 +109,7 @@ def review_select_comments(review_id):
 
 def review_select_one(review_id):
     query = """
-        SELECT r.*, u.username AS reviewer_username
+        SELECT r.*, u.username AS reviewer_username, u.name AS reviewer_name
         FROM reviews r
         LEFT JOIN users u ON r.user_id = u.id
         WHERE r.id = %s

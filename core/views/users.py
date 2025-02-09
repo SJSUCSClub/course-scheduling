@@ -190,7 +190,7 @@ def delete_comment_flag(request):
     comment_id, flag_id = request.GET.get("comment_id"), request.GET.get("flag_id")
     user_id = validate_user(request)
     results = delete(
-        "flag_reviews", {"user_id": user_id, "comment_id": comment_id, "id": flag_id}
+        "flag_comments", {"user_id": user_id, "comment_id": comment_id, "id": flag_id}
     )
     return JsonResponse(results, safe=False)
 

@@ -20,6 +20,7 @@ def get_user_profile(user_id: str):
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
+            review["user_id"] = None
     print(reviews)
     flagged_reviews = user_select_flagged_reviews(user_id)
     for review in flagged_reviews:
