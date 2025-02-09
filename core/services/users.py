@@ -1,4 +1,4 @@
-from core.daos.utils import get, update, insert, delete
+from core.daos.utils import get, update, insert, delete, insert_no_dupes
 from datetime import datetime
 from core.daos import (
     review_select_upvotes,
@@ -65,7 +65,7 @@ def insert_review(user_id, data):
             "take_again": data["take_again"],
             "tags": format_tags(data["tags"]),
             "is_user_anonymous": data["is_user_anonymous"],
-        },
+        }
     )
 
 
@@ -98,13 +98,13 @@ def update_comment(user_id, comment_id, review_id, content):
 
 
 def insert_review_flag(user_id, review_id, reason):
-    return insert(
+    return insert_no_dupes(
         "flag_reviews",
         {
             "user_id": user_id,
             "review_id": review_id,
             "reason": reason
-        }
+        }, ["user_id","review_id"]
     )
 
 
@@ -127,13 +127,13 @@ def insert_vote(user_id, review_id, vote):
 
 
 def insert_comment_flag(user_id, comment_id, reason):
-    return insert(
+    return insert_no_dupes(
         "flag_comments",
         {
             "user_id": user_id,
             "comment_id": comment_id,
             "reason": reason,
-        }
+        }, ["user_id","comment_id"]
     )
 
 

@@ -116,8 +116,6 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     args = locals()
     page = args.pop("page")
     limit = args.pop("limit")
-    # guaranteed unique id per review, thus guaranteed unique name, username, ...
-    # for that review
     query_reviews = (
         "SELECT c.*, u.name AS reviewer_name, u.username AS reviewer_username, JSON_AGG(fc) AS flags "
         + "FROM comments c "

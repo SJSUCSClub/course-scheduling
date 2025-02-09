@@ -38,7 +38,7 @@ def post_review(request):
     data = validate_body(request)
     existing_review = get_existing_review(user_id, data)
     if existing_review:
-        return JsonResponse({"message": "You have already posted a review for this course professor pair."}, status=400)
+        return JsonResponse({"message": "You have already posted a review for this course professor pair."}, status=409)
     results = insert_review(user_id, data)
     return JsonResponse(results, safe=False)
 
@@ -120,6 +120,9 @@ def post_flagged_review(request):
     if flag_immunity:
         return JsonResponse({"message": "This review has already been checked by the admins so it cannot be flagged at this time."}, status=409)
     results = insert_review_flag(user_id, review_id, reason)
+
+    if not results: 
+        return JsonResponse({"message": "You have already posted a flag for this review."}, status=409)
     return JsonResponse(results, safe=False)
 
 
@@ -175,6 +178,8 @@ def post_flagged_comment(request):
     if flag_immunity:
         return JsonResponse({"message": "This comment has already been checked by the admins so it cannot be flagged at this time."}, status=409)
     results = insert_comment_flag(user_id, comment_id, reason)
+    if not results: 
+        return JsonResponse({"message": "You have already posted a flag for this comment."}, status=409)
     return JsonResponse(results, safe=False)
 
 def put_comment_flag(request):
