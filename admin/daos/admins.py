@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update
 from core.daos.reviews import process_tags
-
+from collections import defaultdict
 
 def admin_select(
     sort_by: str = "user_id",
@@ -128,7 +128,12 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     if page and limit:
         query_reviews += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
     ret = fetchall(query_reviews, *list(filter(lambda x: x is not None, args.values())))
-    return ret
+    grouped_by_review = defaultdict(list)
+    for item in ret:
+        grouped_by_review[item["review_id"]].append(item)
+        del item["review_id"]
+    result = [{"review_id": review_id, "comments": ids} for review_id, ids in grouped_by_review.items()]
+    return result
 
 def remove_flagged_review(review_id: int):
     return delete("reviews",{"id": review_id})
