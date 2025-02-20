@@ -1,4 +1,4 @@
-prefix=[
+prefix = [
     "AAS",
     "ADV",
     "AE",
@@ -144,5 +144,5 @@ prefix=[
     "URBP",
     "VIET",
     "WGSS",
-    "ZOOL"
+    "ZOOL",
 ]

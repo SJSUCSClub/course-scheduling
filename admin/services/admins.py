@@ -10,7 +10,7 @@ from admin.daos.admins import (
     remove_flagged_review,
     keep__flagged_review,
     remove_flagged_comment,
-    keep__flagged_comment
+    keep__flagged_comment,
 )
 import math
 
@@ -40,6 +40,7 @@ def get_paginated_flagged_reviews(
         "pages": total_results // limit + (1 if total_results % limit > 0 else 0),
     }
 
+
 def get_paginated_flagged_comments(
     flag_status: str, limit: int = None, page: int = None
 ):
@@ -51,17 +52,20 @@ def get_paginated_flagged_comments(
         "pages": total_results // limit + (1 if total_results % limit > 0 else 0),
     }
 
+
 def manage_flagged_review(review_id: int, action: bool):
     if action:
         return remove_flagged_review(review_id)
     else:
         return keep__flagged_review(review_id)
 
+
 def manage_flagged_comment(comment_id: int, action: bool):
     if action:
         return remove_flagged_comment(comment_id)
     else:
         return keep__flagged_comment(comment_id)
+
 
 def get_admins_list(
     limit: int, page: int, sort_by: str, sort_order: str, query: str = None

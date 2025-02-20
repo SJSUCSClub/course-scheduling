@@ -51,5 +51,5 @@ urlpatterns = [
     path("users/reviews/<int:review_id>", views.review_query),
     path("users/reviews/comments", views.comment_query),
     path("users/reviews/flagged_reviews", views.flagged_review_query),
-    path("users/comments/flagged_comments", views.flagged_comments_query)
+    path("users/comments/flagged_comments", views.flagged_comments_query),
 ]

@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from ..daos import professor_select_summary
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def health_check(request):
     db_timeout = 5
     start_time = time.time()
@@ -27,10 +27,7 @@ def health_check(request):
     overall_status = "Healthy" if db_status == "Healthy" else "Unhealthy"
     response_data = {
         "Status": overall_status,
-        "Database": {
-            "Status": db_status,
-            "Response_time": db_check_time
-        },
+        "Database": {"Status": db_status, "Response_time": db_check_time},
     }
     status_code = 200 if overall_status == "Healthy" else 503
     return JsonResponse(response_data, status=status_code)

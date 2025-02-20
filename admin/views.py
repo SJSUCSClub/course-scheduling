@@ -5,7 +5,12 @@ from authentication.permissions import (
     ModeratorPermission,
 )
 from django.http import JsonResponse
-from core.views.utils import validate_user, validate_body, validate_page_limit, try_response
+from core.views.utils import (
+    validate_user,
+    validate_body,
+    validate_page_limit,
+    try_response,
+)
 from admin.services.admins import (
     check_admin,
     admin_manage_moderator,
@@ -47,6 +52,7 @@ def flagged_comments_view(request):
     )
     return JsonResponse(json_data)
 
+
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission, ModeratorPermission])
 @try_response
@@ -54,12 +60,16 @@ def manage_review_view(request, review_id):
     results = manage_flagged_review(review_id=review_id, action=request.data["action"])
     return JsonResponse(results)
 
+
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission, ModeratorPermission])
 @try_response
 def manage_comment_view(request, comment_id):
-    results = manage_flagged_comment(comment_id=comment_id, action=request.data["action"])
+    results = manage_flagged_comment(
+        comment_id=comment_id, action=request.data["action"]
+    )
     return JsonResponse(results)
+
 
 @api_view(["POST"])
 @permission_classes([AuthenticatedPermission, AdminPermission])
