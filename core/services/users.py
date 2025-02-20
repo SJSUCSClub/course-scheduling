@@ -1,4 +1,4 @@
-from core.daos.utils import get, update, insert, delete
+from core.daos.utils import get, update, insert, delete, insert_no_dupes
 from datetime import datetime
 from core.daos import (
     review_select_upvotes,
@@ -20,6 +20,8 @@ def get_user_profile(user_id: str):
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
             review["reviewer_name"] = None
+            review["user_id"] = None
+    print(reviews)
     flagged_reviews = user_select_flagged_reviews(user_id)
     for review in flagged_reviews:
         review["votes"] = review_select_upvotes(review["id"])
@@ -47,15 +49,6 @@ def get_existing_review(user_id, data):
         },
     )
 
-def check_flag_immunity(review_id: int):
-    review = get(
-        "reviews",
-        {
-            "id": review_id,
-        },
-    )
-    flag_immune_until = review[0]["flag_immune_until"]
-    return flag_immune_until > datetime.now()
 
 def insert_review(user_id, data):
     return insert(
@@ -72,7 +65,7 @@ def insert_review(user_id, data):
             "take_again": data["take_again"],
             "tags": format_tags(data["tags"]),
             "is_user_anonymous": data["is_user_anonymous"],
-        },
+        }
     )
 
 
@@ -85,59 +78,70 @@ def update_review(user_id, review_id, **data):
     return update("reviews",data,{"user_id": user_id, "id": review_id})
 
 
-def insert_comment(user_id, data):
+def insert_comment(user_id, review_id, content):
     return insert(
         "comments",
         {
             "user_id": user_id,
-            "review_id": data["review_id"],
-            "content": data["content"],
-        },
+            "review_id": review_id,
+            "content": content,
+        }
     )
 
 
-def update_comment(user_id, comment_id, review_id, data):
+def update_comment(user_id, comment_id, review_id, content):
     return update(
         "comments",
-        {"content": data["content"], "updated_at": datetime.now()},
-        {"user_id": user_id, "review_id": review_id, "id": comment_id},
+        {"content": content, "updated_at": datetime.now()},
+        {"user_id": user_id, "review_id": review_id, "id": comment_id}
     )
 
 
-def insert_flag(user_id, data):
-    return insert(
+def insert_review_flag(user_id, review_id, reason):
+    return insert_no_dupes(
         "flag_reviews",
         {
             "user_id": user_id,
-            "review_id": data["review_id"],
-            "reason": data["reason"],
-        },
+            "review_id": review_id,
+            "reason": reason
+        }, ["user_id","review_id"]
     )
 
 
-def update_flag(user_id, flag_id, review_id, data):
+def update_review_flag(user_id, flag_id, review_id, reason):
     return update(
         "flag_reviews",
-        {"reason": data["reason"]},
-        {"user_id": user_id, "review_id": review_id, "id": flag_id},
+        {"reason": reason, "updated_at": datetime.now()},
+        {"user_id": user_id, "review_id": review_id, "id": flag_id}
     )
 
 
-def insert_vote(user_id, data):
-    if data["vote"] == None:
-        return delete(
-            "user_review_critique", {"user_id": user_id, "review_id": data["review_id"]}
-        )
-    check = get(
-        "user_review_critique", {"user_id": user_id, "review_id": data["review_id"]}
+def insert_vote(user_id, review_id, vote):
+    where_condition = {"user_id": user_id, "review_id": review_id}
+    if vote is None:
+        return delete("user_review_critique", where_condition)
+    existing_vote = get("user_review_critique", where_condition)
+    if existing_vote:
+        return update("user_review_critique", {"upvote": vote}, where_condition)
+    return insert("user_review_critique", {**where_condition, "upvote": vote})
+
+
+def insert_comment_flag(user_id, comment_id, reason):
+    return insert_no_dupes(
+        "flag_comments",
+        {
+            "user_id": user_id,
+            "comment_id": comment_id,
+            "reason": reason,
+        }, ["user_id","comment_id"]
     )
-    if check:
-        return update(
-            "user_review_critique",
-            {"upvote": data["vote"]},
-            {"user_id": user_id, "review_id": data["review_id"]},
-        )
-    return insert(
-        "user_review_critique",
-        {"user_id": user_id, "review_id": data["review_id"], "upvote": data["vote"]},
+
+
+def update_comment_flag(user_id, flag_id, comment_id, reason):
+    return update(
+        "flag_comments",
+        {"reason": reason, "updated_at": datetime.now()},
+        {"user_id": user_id, "comment_id": comment_id, "id": flag_id},
     )
+
+

@@ -2,6 +2,7 @@ from core.constants import DEFAULT_PAGE, DEFAULT_PAGE_LIMIT
 from django.http import JsonResponse, HttpRequest
 import traceback
 import sys
+from datetime import datetime
 from better_profanity import profanity
 
 def validate_page_limit(request: HttpRequest):
@@ -41,3 +42,7 @@ def format_tags(tags):
 
 def content_check(content: str):
     return profanity.contains_profanity(content)
+
+def check_flag_immunity(item):
+    flag_immune_until = item["flag_immune_until"]
+    return flag_immune_until > datetime.now()

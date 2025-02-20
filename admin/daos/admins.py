@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update
 from core.daos.reviews import process_tags
-
+from collections import defaultdict
 
 def admin_select(
     sort_by: str = "user_id",
@@ -104,31 +104,51 @@ def flagged_reviews_select(status: str = None, limit: int = None, page: int = No
         el["tags"] = process_tags(el["tags"])
     return ret
 
+def flagged_comments_select_counts(
+    status: str = None,
+) -> int:
+    args = locals()
+    query = "SELECT COUNT(DISTINCT comment_id) FROM flag_comments" + to_where(**args)
+    return fetchone(query, *list(filter(lambda x: x is not None, args.values())))[0]
+
+
+def flagged_comments_select(status: str = None, limit: int = None, page: int = None):
+    args = locals()
+    page = args.pop("page")
+    limit = args.pop("limit")
+    query_reviews = (
+        "SELECT c.*, u.name AS reviewer_name, u.username AS reviewer_username, JSON_AGG(fc) AS flags "
+        + "FROM comments c "
+        + "LEFT JOIN (SELECT * FROM flag_comments inner_fc LEFT JOIN users inner_u ON inner_fc.user_id = inner_u.id) AS fc ON fc.comment_id = c.id "
+        + "LEFT JOIN users u ON c.user_id = u.id "
+        + to_where(**args, table_name="fc")
+        + " GROUP BY (c.id, u.name, u.username)"
+    )
+
+    if page and limit:
+        query_reviews += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
+    ret = fetchall(query_reviews, *list(filter(lambda x: x is not None, args.values())))
+    grouped_by_review = defaultdict(list)
+    for item in ret:
+        grouped_by_review[item["review_id"]].append(item)
+        del item["review_id"]
+    result = [{"review_id": review_id, "comments": ids} for review_id, ids in grouped_by_review.items()]
+    return result
 
 def remove_flagged_review(review_id: int):
-    return delete(
-        "reviews",
-        {
-            "id": review_id,
-        },
-    )
+    return delete("reviews",{"id": review_id})
 
 
 def keep__flagged_review(review_id: int):
-    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    update(
-        "flag_reviews",
-        {
-            "status": "Declined",
-        },
-        {"review_id": review_id},
-    )
-    return update(
-        "reviews",
-        {
-            "flag_immune_until": immune_until,
-        },
-        {"id": review_id},
-    )
+    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime("%Y-%m-%d %H:%M:%S")
+    update("flag_reviews",{"status": "Declined"},{"review_id": review_id})
+    return update("reviews",{"flag_immune_until": immune_until},{"id": review_id})
+
+def remove_flagged_comment(comment_id: int):
+    return delete("comments",{"id": comment_id})
+
+
+def keep__flagged_comment(comment_id: int):
+    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime("%Y-%m-%d %H:%M:%S")
+    update("flag_comments",{"status": "Declined"},{"comment_id": comment_id})
+    return update("comments",{"flag_immune_until": immune_until},{"id": comment_id})

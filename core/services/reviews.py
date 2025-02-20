@@ -5,6 +5,7 @@ from core.daos import (
     review_select_tags,
     review_select_comments,
     user_voted_review,
+    review_select_one
 )
 
 
@@ -28,6 +29,7 @@ def get_paginated_reviews_by_course(
 
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
+            review["user_id"] = None
             review["reviewer_name"] = None
 
     total_results = reviews_select_count(dept, course_number, tags=tags)
@@ -66,6 +68,7 @@ def get_paginated_reviews_by_professor(
 
         # don't send user's actual name if the review is anonymous
         if review["is_user_anonymous"]:
+            review["user_id"] = None
             review["reviewer_name"] = None
 
     total_results = reviews_select_count(professor_id=professor_id, tags=tags)
@@ -81,6 +84,13 @@ def get_paginated_reviews_by_professor(
 
 def get_review_comments(review_id: str):
     return review_select_comments(review_id)
+
+def get_review(review_id: str):
+    review = review_select_one(review_id)
+    if review["is_user_anonymous"]:
+        review["user_id"] = None
+        review["reviewer_name"] = None
+    return review
 
 
 def get_paginated_reviews_with_comments_by_course(

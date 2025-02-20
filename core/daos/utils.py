@@ -65,7 +65,19 @@ def insert(table_name: str, data: dict):
         rows_changed = cursor.rowcount
         return {"message": f"{rows_changed} row(s) were changed"}
 
-
+def insert_no_dupes(table_name:str, data:dict, conflict:list):
+    with connection.cursor() as cursor:
+        columns = ", ".join(data.keys())
+        placeholders = ", ".join(["%s"] * len(data))
+        on_conflict = ", ".join(conflict)
+        cursor.execute(
+            f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) ON CONFLICT ({on_conflict}) DO NOTHING",
+            list(data.values()),
+        )
+        rows_changed = cursor.rowcount
+        if rows_changed > 0:
+            return {"message": f"{rows_changed} row(s) were changed"}
+        return rows_changed
 def update(table_name: str, data: dict, where: dict):
     with connection.cursor() as cursor:
         set_clause = ", ".join([f"{key} = %s" for key in data.keys()])
