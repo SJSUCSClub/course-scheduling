@@ -3,6 +3,7 @@ from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update
 from core.daos.reviews import process_tags
 from collections import defaultdict
 
+
 def admin_select(
     sort_by: str = "user_id",
     sort_order: str = "ASC",
@@ -104,6 +105,7 @@ def flagged_reviews_select(status: str = None, limit: int = None, page: int = No
         el["tags"] = process_tags(el["tags"])
     return ret
 
+
 def flagged_comments_select_counts(
     status: str = None,
 ) -> int:
@@ -132,23 +134,32 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     for item in ret:
         grouped_by_review[item["review_id"]].append(item)
         del item["review_id"]
-    result = [{"review_id": review_id, "comments": ids} for review_id, ids in grouped_by_review.items()]
+    result = [
+        {"review_id": review_id, "comments": ids}
+        for review_id, ids in grouped_by_review.items()
+    ]
     return result
 
+
 def remove_flagged_review(review_id: int):
-    return delete("reviews",{"id": review_id})
+    return delete("reviews", {"id": review_id})
 
 
 def keep__flagged_review(review_id: int):
-    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime("%Y-%m-%d %H:%M:%S")
-    update("flag_reviews",{"status": "Declined"},{"review_id": review_id})
-    return update("reviews",{"flag_immune_until": immune_until},{"id": review_id})
+    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    update("flag_reviews", {"status": "Declined"}, {"review_id": review_id})
+    return update("reviews", {"flag_immune_until": immune_until}, {"id": review_id})
+
 
 def remove_flagged_comment(comment_id: int):
-    return delete("comments",{"id": comment_id})
+    return delete("comments", {"id": comment_id})
 
 
 def keep__flagged_comment(comment_id: int):
-    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime("%Y-%m-%d %H:%M:%S")
-    update("flag_comments",{"status": "Declined"},{"comment_id": comment_id})
-    return update("comments",{"flag_immune_until": immune_until},{"id": comment_id})
+    immune_until = (datetime.now() + timedelta(days=6 * 30)).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    update("flag_comments", {"status": "Declined"}, {"comment_id": comment_id})
+    return update("comments", {"flag_immune_until": immune_until}, {"id": comment_id})

@@ -1,6 +1,7 @@
 from typing import Union, Literal
 from django.db import connection
 
+
 def to_where(
     join: Union[Literal["AND"], Literal["OR"]] = "AND",
     prefix: bool = True,
@@ -65,7 +66,8 @@ def insert(table_name: str, data: dict):
         rows_changed = cursor.rowcount
         return {"message": f"{rows_changed} row(s) were changed"}
 
-def insert_no_dupes(table_name:str, data:dict, conflict:list):
+
+def insert_no_dupes(table_name: str, data: dict, conflict: list):
     with connection.cursor() as cursor:
         columns = ", ".join(data.keys())
         placeholders = ", ".join(["%s"] * len(data))
@@ -78,6 +80,8 @@ def insert_no_dupes(table_name:str, data:dict, conflict:list):
         if rows_changed > 0:
             return {"message": f"{rows_changed} row(s) were changed"}
         return rows_changed
+
+
 def update(table_name: str, data: dict, where: dict):
     with connection.cursor() as cursor:
         set_clause = ", ".join([f"{key} = %s" for key in data.keys()])
@@ -97,6 +101,7 @@ def delete(table_name: str, where: dict):
         rows_changed = cursor.rowcount
         return {"message": f"{rows_changed} row(s) were changed"}
 
-def get(table_name:str, where: dict):
+
+def get(table_name: str, where: dict):
     query = f"SELECT * FROM {table_name} {to_where(**where)}"
     return fetchall(query, *list(where.values()))

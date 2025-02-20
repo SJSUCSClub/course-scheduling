@@ -65,17 +65,25 @@ def insert_review(user_id, data):
             "take_again": data["take_again"],
             "tags": format_tags(data["tags"]),
             "is_user_anonymous": data["is_user_anonymous"],
-        }
+        },
     )
 
 
 def update_review(user_id, review_id, **data):
-    allowed_keys = ["tags", "content", "quality", "ease", "grade", "take_again", "is_user_anonymous"]
+    allowed_keys = [
+        "tags",
+        "content",
+        "quality",
+        "ease",
+        "grade",
+        "take_again",
+        "is_user_anonymous",
+    ]
     data = {key: value for key, value in data.items() if key in allowed_keys}
     if "tags" in data:
         data["tags"] = format_tags(data.get("tags", []))
     data["updated_at"] = datetime.now()
-    return update("reviews",data,{"user_id": user_id, "id": review_id})
+    return update("reviews", data, {"user_id": user_id, "id": review_id})
 
 
 def insert_comment(user_id, review_id, content):
@@ -85,7 +93,7 @@ def insert_comment(user_id, review_id, content):
             "user_id": user_id,
             "review_id": review_id,
             "content": content,
-        }
+        },
     )
 
 
@@ -93,18 +101,15 @@ def update_comment(user_id, comment_id, review_id, content):
     return update(
         "comments",
         {"content": content, "updated_at": datetime.now()},
-        {"user_id": user_id, "review_id": review_id, "id": comment_id}
+        {"user_id": user_id, "review_id": review_id, "id": comment_id},
     )
 
 
 def insert_review_flag(user_id, review_id, reason):
     return insert_no_dupes(
         "flag_reviews",
-        {
-            "user_id": user_id,
-            "review_id": review_id,
-            "reason": reason
-        }, ["user_id","review_id"]
+        {"user_id": user_id, "review_id": review_id, "reason": reason},
+        ["user_id", "review_id"],
     )
 
 
@@ -112,7 +117,7 @@ def update_review_flag(user_id, flag_id, review_id, reason):
     return update(
         "flag_reviews",
         {"reason": reason, "updated_at": datetime.now()},
-        {"user_id": user_id, "review_id": review_id, "id": flag_id}
+        {"user_id": user_id, "review_id": review_id, "id": flag_id},
     )
 
 
@@ -133,7 +138,8 @@ def insert_comment_flag(user_id, comment_id, reason):
             "user_id": user_id,
             "comment_id": comment_id,
             "reason": reason,
-        }, ["user_id","comment_id"]
+        },
+        ["user_id", "comment_id"],
     )
 
 
@@ -143,5 +149,3 @@ def update_comment_flag(user_id, flag_id, comment_id, reason):
         {"reason": reason, "updated_at": datetime.now()},
         {"user_id": user_id, "comment_id": comment_id, "id": flag_id},
     )
-
-

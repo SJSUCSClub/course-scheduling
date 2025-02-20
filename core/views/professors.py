@@ -47,8 +47,8 @@ def professor_reviews_view(request, professor_id):
         **validate_page_limit(request),
         tags=request.GET.getlist("tags"),
         user_id=validate_user(request),
-        order_by = request.GET.get('order_by', 'created_at'),
-        sort_order = request.GET.get('sort_order', 'DESC')
+        order_by=request.GET.get("order_by", "created_at"),
+        sort_order=request.GET.get("sort_order", "DESC"),
     )
 
     return JsonResponse(json_data)
