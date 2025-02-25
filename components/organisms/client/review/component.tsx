@@ -95,7 +95,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
     const formData = new FormData(e.currentTarget);
     const reason = formData.get('reason') as string;
     const body = {
-      review_id: comment.review_id,
+      comment_id: comment.id,
       reason,
     };
     fetch(`/django/core/users/flagged_comments`, {
@@ -115,7 +115,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
 
   return (
     <>
-      <div className="flex items-center px-md pb-md">
+      <div className="flex items-center gap-sm px-md pb-md">
         <div className="flex-1">
           <p>
             <span className="font-bold">{comment.user_id}</span>{' '}
@@ -127,6 +127,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
           </p>
           <p>{comment.content}</p>
         </div>
+
         {props.userId == comment.user_id ? (
           <div>
             <Btn
@@ -145,6 +146,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
         >
           <FlagIcon width={24} height={24} />
         </Btn>
+
         <dialog
           popover="auto"
           id={`report-review-${comment.id}`}

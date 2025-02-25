@@ -1,5 +1,5 @@
 'use client';
-import { Check } from '@/app/(main)/admin/check';
+import { CheckWithoutProviders } from '@/app/(main)/admin/check';
 import { Manage } from '@/app/(main)/admin/manage/manage';
 import SWRConfigProvider from '@/wrappers/swr-config';
 
@@ -8,9 +8,9 @@ export default function Admins() {
     <main>
       {/* Add Mod section */}
       <SWRConfigProvider>
-        <Check justAdministrators>
+        <CheckWithoutProviders justAdministrators>
           <Manage />
-        </Check>
+        </CheckWithoutProviders>
       </SWRConfigProvider>
     </main>
   );
