@@ -1,0 +1,16 @@
+name: Format
+
+on: [pull_request]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: psf/black@stable
+        with:
+          options: ""
+      # push back to PR
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Format files with Black

@@ -7,18 +7,19 @@ def process_tags(tags: str) -> List[str]:
     return [tag.strip('"{} ') for tag in tags.split(",")]
 
 
-#broken, to do later. also probably a better way to do sort reviews by this since we count votes in another query
-def sort_reviews_by_likes(query: str, sort_order: str,args):
+# broken, to do later. also probably a better way to do sort reviews by this since we count votes in another query
+def sort_reviews_by_likes(query: str, sort_order: str, args):
 
     # query += """
     #     LEFT JOIN user_review_critique urc ON r.id = urc.review_id
     # """
     query += to_where(**args)
-    query+=f"""
+    query += f"""
         GROUP BY r.id, u.name, u.username, p.id, p.name, p.email
         ORDER BY SUM(CASE WHEN urc.upvote THEN 1 ELSE 0 END) {sort_order}
     """
     return query
+
 
 def reviews_select(
     department: str = None,
@@ -28,7 +29,7 @@ def reviews_select(
     limit: int = None,
     page: int = None,
     sort_order: str = "DESC",
-    order_by: str = "created_at"
+    order_by: str = "created_at",
 ):
     """
     Select reviews from the database with any of the given filters
@@ -103,6 +104,7 @@ def review_select_upvotes(review_id):
 
     return votes
 
+
 def review_select_comments(review_id):
     return get("comments", {"review_id": review_id})
 
@@ -114,10 +116,11 @@ def review_select_one(review_id):
         LEFT JOIN users u ON r.user_id = u.id
         WHERE r.id = %s
     """
-    ret = fetchone_as_dict(query,review_id)
+    ret = fetchone_as_dict(query, review_id)
     if "tags" in ret:
         ret["tags"] = process_tags(ret["tags"])
     return ret
+
 
 def review_select_tags(
     **kwargs,

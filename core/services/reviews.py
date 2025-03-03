@@ -5,12 +5,19 @@ from core.daos import (
     review_select_tags,
     review_select_comments,
     user_voted_review,
-    review_select_one
+    review_select_one,
 )
 
 
 def get_paginated_reviews_by_course(
-    dept: str, course_number: str, limit: int, page: int, tags=[], user_id=None, order_by = str, sort_order = str
+    dept: str,
+    course_number: str,
+    limit: int,
+    page: int,
+    tags=[],
+    user_id=None,
+    order_by=str,
+    sort_order=str,
 ):
     reviews = reviews_select(
         dept,
@@ -19,7 +26,7 @@ def get_paginated_reviews_by_course(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order
+        sort_order=sort_order,
     )
 
     for review in reviews:
@@ -44,7 +51,13 @@ def get_paginated_reviews_by_course(
 
 
 def get_paginated_reviews_by_professor(
-    professor_id: str, limit: int, page: int, tags=[], user_id=None, order_by = str, sort_order = str
+    professor_id: str,
+    limit: int,
+    page: int,
+    tags=[],
+    user_id=None,
+    order_by=str,
+    sort_order=str,
 ):
     """
     Returns a paginated list of reviews for a professor
@@ -57,7 +70,7 @@ def get_paginated_reviews_by_professor(
         limit=limit,
         page=page,
         order_by=order_by,
-        sort_order=sort_order
+        sort_order=sort_order,
     )
 
     for review in reviews:
@@ -84,6 +97,7 @@ def get_paginated_reviews_by_professor(
 
 def get_review_comments(review_id: str):
     return review_select_comments(review_id)
+
 
 def get_review(review_id: str):
     review = review_select_one(review_id)
