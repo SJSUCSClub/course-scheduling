@@ -119,9 +119,9 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     page = args.pop("page")
     limit = args.pop("limit")
     query_reviews = (
-        "SELECT c.*, u.name AS reviewer_name, u.username AS reviewer_username, JSON_AGG(fc) AS flags "
+        "SELECT c.*, u.name AS commenter_name, u.username AS commenter_username, JSON_AGG(fc) AS flags "
         + "FROM comments c "
-        + "LEFT JOIN (SELECT * FROM flag_comments inner_fc LEFT JOIN users inner_u ON inner_fc.user_id = inner_u.id) AS fc ON fc.comment_id = c.id "
+        + "LEFT JOIN (SELECT inner_fc.*, inner_u.name AS name, inner_u.email AS email, inner_u.username AS username, inner_u.is_professor AS is_professor FROM flag_comments inner_fc LEFT JOIN users inner_u ON inner_fc.user_id = inner_u.id) AS fc ON fc.comment_id = c.id "
         + "LEFT JOIN users u ON c.user_id = u.id "
         + to_where(**args, table_name="fc")
         + " GROUP BY (c.id, u.name, u.username)"
@@ -130,6 +130,7 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     if page and limit:
         query_reviews += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
     ret = fetchall(query_reviews, *list(filter(lambda x: x is not None, args.values())))
+    print(ret)
     grouped_by_review = defaultdict(list)
     for item in ret:
         grouped_by_review[item["review_id"]].append(item)
