@@ -119,7 +119,7 @@ def flagged_comments_select(status: str = None, limit: int = None, page: int = N
     page = args.pop("page")
     limit = args.pop("limit")
     query_reviews = (
-        "SELECT c.*, u.name AS reviewer_name, u.username AS reviewer_username, JSON_AGG(fc) AS flags "
+        "SELECT c.*, u.name AS commenter_name, u.username AS commenter_username, JSON_AGG(fc) AS flags "
         + "FROM comments c "
         + "LEFT JOIN (SELECT * FROM flag_comments inner_fc LEFT JOIN users inner_u ON inner_fc.user_id = inner_u.id) AS fc ON fc.comment_id = c.id "
         + "LEFT JOIN users u ON c.user_id = u.id "
