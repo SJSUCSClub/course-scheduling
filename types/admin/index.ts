@@ -44,6 +44,38 @@ export interface AdminFlaggedReviewsResponse {
     }[];
   }[];
 }
+export interface AdminFlaggedCommentsResponse {
+  total_results: number;
+  pages: number;
+  page: number;
+  items: {
+    review_id: number;
+    comments: {
+      id: number;
+      user_id: string | null;
+      created_at: string;
+      updated_at: string | null;
+      content: string;
+      commenter_name: string | null;
+      commenter_username: string | null;
+      // flags
+      flags: {
+        user_id: string;
+        comment_id: string;
+        created_at: string;
+        updated_at: string | null;
+        reason: string;
+        status: 'Pending' | 'Approved' | 'Declined';
+        // user attributes
+        username: string | null;
+        name: string;
+        email: string;
+        is_professor: boolean;
+      }[];
+    }[];
+  }[];
+}
+
 export interface AdminListResponse {
   total_results: number;
   pages: number;

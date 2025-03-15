@@ -8,7 +8,7 @@ interface CheckProps extends PropsWithChildren {
 
 export const RoleContext = createContext<AdminEnum | undefined>(undefined);
 
-export const Check: React.FC<CheckProps> = ({
+export const CheckWithoutProviders: React.FC<CheckProps> = ({
   children,
   justAdministrators,
 }) => {

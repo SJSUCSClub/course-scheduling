@@ -1,15 +1,19 @@
 'use client';
-import { Check } from '@/app/(main)/admin/check';
-import { Dashboard } from '@/app/(main)/admin/dashboard';
+import { CheckWithoutProviders } from '@/app/(main)/admin/check';
+import { DashboardWithoutProviders } from '@/app/(main)/admin/dashboard';
 import SWRConfigProvider from '@/wrappers/swr-config';
 
-export default function Page() {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: { page: string };
+}) {
   return (
     <main>
       <SWRConfigProvider>
-        <Check>
-          <Dashboard />
-        </Check>
+        <CheckWithoutProviders>
+          <DashboardWithoutProviders page={searchParams.page ?? '1'} />
+        </CheckWithoutProviders>
       </SWRConfigProvider>
     </main>
   );

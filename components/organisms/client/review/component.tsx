@@ -60,6 +60,160 @@ export const Review: React.FC<Props> = (props) => (
   </SWRConfigProvider>
 );
 
+interface CommentProps {
+  // comment props
+  comment: {
+    id: number;
+    review_id: number;
+    user_id: string | null;
+    created_at: string;
+    updated_at: string | null;
+    content: string;
+  };
+  // and additional knowledge
+  isAuthenticated: boolean;
+  session: SessionType | null;
+  userId: string | null;
+  handleDeleteComment: (commentId: number) => void;
+}
+const CommentWithoutProviders: React.FC<CommentProps> = ({
+  comment,
+  handleDeleteComment,
+  ...props
+}) => {
+  const [hasFlagged, setHasFlagged] = React.useState(false);
+  const [error, setError] = React.useState(false);
+  const router = useRouter();
+  const [cookies] = useCookies(['csrftoken']);
+
+  const handleReportComment = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!props.isAuthenticated) {
+      router.push('/django/google/authorize');
+      return;
+    }
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const reason = formData.get('reason') as string;
+    const body = {
+      comment_id: comment.id,
+      reason,
+    };
+    fetch(`/django/core/users/flagged_comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': cookies.csrftoken,
+      },
+      body: JSON.stringify(body),
+    }).then((res) => {
+      if (!res.ok) {
+        setError(true); // TODO - show error; current logic doesn't work
+      }
+      setHasFlagged(true);
+    });
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-sm px-md pb-md">
+        <div className="flex-1">
+          <p>
+            <span className="font-bold">{comment.user_id}</span>{' '}
+            <span className="text-neutral">
+              {comment.updated_at
+                ? `updated on ${dayjs(comment.updated_at).format('MMMM D, YYYY')}`
+                : `commented on ${dayjs(comment.created_at).format('MMMM D, YYYY')}`}
+            </span>
+          </p>
+          <p>{comment.content}</p>
+        </div>
+
+        {props.userId == comment.user_id ? (
+          <div>
+            <Btn
+              className="gap-sm rounded-sm p-0"
+              variant="tertiary"
+              onClick={() => handleDeleteComment(comment.id)}
+            >
+              <TrashIcon width={24} height={24} />
+            </Btn>
+          </div>
+        ) : null}
+        <Btn
+          className="gap-sm rounded-sm p-0"
+          variant="tertiary"
+          popoverTarget={`report-review-${comment.id}`}
+        >
+          <FlagIcon width={24} height={24} />
+        </Btn>
+
+        <dialog
+          popover="auto"
+          id={`report-review-${comment.id}`}
+          className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
+          onClose={() => setHasFlagged(false)}
+        >
+          <Card className="w-[300px] p-md">
+            {!hasFlagged ? (
+              <>
+                <p className="pb-md font-bold">Reason:</p>
+                <form onSubmit={handleReportComment}>
+                  <Textarea
+                    required
+                    minLength={10}
+                    className="w-full"
+                    placeholder="Please provide a reason..."
+                    name="reason"
+                  />
+                  <div className="flex w-full gap-sm pt-md">
+                    <Btn
+                      className="!bg-important text-background"
+                      variant="primary"
+                      type="submit"
+                      popoverTarget={`report-review-${comment.id}`}
+                    >
+                      Report
+                    </Btn>
+                    <Btn
+                      className="bg-background text-primary"
+                      variant="primary"
+                      type="button"
+                      popoverTarget={`report-review-${comment.id}`}
+                    >
+                      Cancel
+                    </Btn>
+                  </div>
+                </form>
+                {error ? (
+                  <p className="pt-md text-important">
+                    There was an error making your request.
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <p className="pb-md text-center">
+                  Thank you for providing your feedback. We will review this
+                  report.
+                </p>
+                <div className="flex w-full justify-center">
+                  <Btn
+                    className="w-min"
+                    variant="primary"
+                    popoverTarget={`report-review-${comment.id}`}
+                  >
+                    Close
+                  </Btn>
+                </div>
+              </>
+            )}
+          </Card>
+        </dialog>
+      </div>
+    </>
+  );
+};
+
 interface CommentsProps {
   reviewId: string;
   userId: string | null;
@@ -142,30 +296,13 @@ const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
             {data.map((comment, i) => (
               <div className="flex flex-col gap-md" key={i}>
                 {i > 0 ? <hr /> : null}
-                <div className="flex items-center px-md pb-md">
-                  <div className="flex-1">
-                    <p>
-                      <span className="font-bold">{comment.user_id}</span>{' '}
-                      <span className="text-neutral">
-                        {comment.updated_at
-                          ? `updated on ${dayjs(comment.updated_at).format('MMMM D, YYYY')}`
-                          : `commented on ${dayjs(comment.created_at).format('MMMM D, YYYY')}`}
-                      </span>
-                    </p>
-                    <p>{comment.content}</p>
-                  </div>
-                  {props.userId == comment.user_id ? (
-                    <div>
-                      <Btn
-                        className="gap-sm rounded-sm p-0"
-                        variant="tertiary"
-                        onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        <TrashIcon width={24} height={24} />
-                      </Btn>
-                    </div>
-                  ) : null}
-                </div>
+                <CommentWithoutProviders
+                  comment={comment}
+                  userId={props.userId}
+                  isAuthenticated={props.isAuthenticated}
+                  session={props.session}
+                  handleDeleteComment={handleDeleteComment}
+                />
               </div>
             ))}
           </div>
