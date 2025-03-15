@@ -9,9 +9,46 @@ import {
 } from '@/types';
 import { cn } from '@/utils/cn';
 import dayjs from 'dayjs';
+import Link from 'next/link';
 import React, { useContext, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import useSWR from 'swr';
+interface ActionablePopoverProps {
+  onConfirm: () => Promise<void>;
+  popoverId: string;
+  dialog: string;
+}
+
+const ActionablePopover: React.FC<ActionablePopoverProps> = (props) => {
+  return (
+    <dialog
+      popover="auto"
+      id={props.popoverId}
+      className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
+    >
+      <Card className="flex w-[300px] flex-col p-md">
+        <p>{props.dialog}</p>
+        <div className="flex w-full flex-row gap-sm pt-md">
+          <Btn
+            variant="primary"
+            className="!bg-important text-background"
+            popoverTarget={props.popoverId}
+            onClick={props.onConfirm}
+          >
+            Yes
+          </Btn>
+          <Btn
+            className="bg-background text-primary"
+            variant="primary"
+            popoverTarget={props.popoverId}
+          >
+            No
+          </Btn>
+        </div>
+      </Card>
+    </dialog>
+  );
+};
 
 const useFlaggedReviews = (page: string) => {
   const searchParams = new URLSearchParams();
@@ -20,6 +57,7 @@ const useFlaggedReviews = (page: string) => {
     '/django/admin/flagged-reviews?' + searchParams.toString(),
   );
 };
+
 const FlaggedReviewsView: React.FC<{ page: string }> = ({ page }) => {
   const { data, mutate } = useFlaggedReviews(page);
 
@@ -46,60 +84,16 @@ const FlaggedReviewsView: React.FC<{ page: string }> = ({ page }) => {
           <div className="flex flex-1 flex-col items-stretch gap-md pb-md">
             {data?.items.map((val) => (
               <>
-                <dialog
-                  popover="auto"
-                  id={`review-${val.id}-delete`}
-                  className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
-                >
-                  <Card className="flex w-[300px] flex-col p-md">
-                    <p>Are you sure you want to delete this review?</p>
-                    <div className="flex w-full flex-row gap-sm pt-md">
-                      <Btn
-                        variant="primary"
-                        className="!bg-important text-background"
-                        popoverTarget={`review-${val.id}-delete`}
-                        onClick={async () => handleAction(val.id, true)}
-                      >
-                        Yes
-                      </Btn>
-                      <Btn
-                        className="bg-background text-primary"
-                        variant="primary"
-                        popoverTarget={`review-${val.id}-delete`}
-                      >
-                        No
-                      </Btn>
-                    </div>
-                  </Card>
-                </dialog>
-
-                <dialog
-                  popover="auto"
-                  id={`review-${val.id}-keep`}
-                  className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
-                >
-                  <Card className="flex w-[300px] flex-col p-md">
-                    <p>Are you sure you want to keep this review?</p>
-                    <div className="flex w-full flex-row gap-sm pt-md">
-                      <Btn
-                        variant="primary"
-                        className="!bg-important text-background"
-                        popoverTarget={`review-${val.id}-keep`}
-                        onClick={async () => handleAction(val.id, false)}
-                      >
-                        Yes
-                      </Btn>
-                      <Btn
-                        className="bg-background text-primary"
-                        variant="primary"
-                        popoverTarget={`review-${val.id}-keep`}
-                      >
-                        No
-                      </Btn>
-                    </div>
-                  </Card>
-                </dialog>
-
+                <ActionablePopover
+                  onConfirm={async () => await handleAction(val.id, true)}
+                  popoverId={`review-${val.id}-delete`}
+                  dialog="Are you sure you want to delete this review?"
+                />
+                <ActionablePopover
+                  onConfirm={async () => await handleAction(val.id, false)}
+                  popoverId={`review-${val.id}-keep`}
+                  dialog="Are you sure you want to keep this review?"
+                />
                 <Card
                   key={`review${val.id}`}
                   className="flex w-full flex-col gap-[20px] p-4 lg:flex-row"
@@ -214,73 +208,51 @@ const FlaggedCommentsView: React.FC<{ page: string }> = ({ page }) => {
             {data?.items.map((val) =>
               val.comments.map((comment) => (
                 <>
-                  <dialog
-                    popover="auto"
-                    id={`comment-${comment.id}-delete`}
-                    className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
-                  >
-                    <Card className="flex w-[300px] flex-col p-md">
-                      <p>Are you sure you want to delete this comment?</p>
-                      <div className="flex w-full flex-row gap-sm pt-md">
-                        <Btn
-                          variant="primary"
-                          className="!bg-important text-background"
-                          popoverTarget={`comment-${comment.id}-delete`}
-                          onClick={async () => handleAction(comment.id, true)}
-                        >
-                          Yes
-                        </Btn>
-                        <Btn
-                          className="bg-background text-primary"
-                          variant="primary"
-                          popoverTarget={`comment-${comment.id}-delete`}
-                        >
-                          No
-                        </Btn>
-                      </div>
-                    </Card>
-                  </dialog>
-
-                  <dialog
-                    popover="auto"
-                    id={`comment-${comment.id}-keep`}
-                    className="bg-[#00000000] backdrop:bg-text backdrop:opacity-25"
-                  >
-                    <Card className="flex w-[300px] flex-col p-md">
-                      <p>Are you sure you want to keep this comment?</p>
-                      <div className="flex w-full flex-row gap-sm pt-md">
-                        <Btn
-                          variant="primary"
-                          className="!bg-important text-background"
-                          popoverTarget={`comment-${comment.id}-keep`}
-                          onClick={async () => handleAction(comment.id, false)}
-                        >
-                          Yes
-                        </Btn>
-                        <Btn
-                          className="bg-background text-primary"
-                          variant="primary"
-                          popoverTarget={`comment-${comment.id}-keep`}
-                        >
-                          No
-                        </Btn>
-                      </div>
-                    </Card>
-                  </dialog>
+                  <ActionablePopover
+                    onConfirm={async () => await handleAction(comment.id, true)}
+                    popoverId={`comment-${comment.id}-delete`}
+                    dialog="Are you sure you want to delete this comment?"
+                  />
+                  <ActionablePopover
+                    onConfirm={async () =>
+                      await handleAction(comment.id, false)
+                    }
+                    popoverId={`comment-${comment.id}-keep`}
+                    dialog="Are you sure you want to keep this comment?"
+                  />
 
                   <Card
                     key={`comment${comment.id}`}
                     className="flex w-full flex-col gap-[20px] p-4 lg:flex-row"
                   >
                     <Card className="top-24 h-min p-md pb-sm lg:sticky lg:top-4 lg:w-2/3">
-                      <div className="flex flex-col justify-between pb-sm lg:flex-row">
-                        <p className="font-bold text-text">
-                          {comment.commenter_name}
-                        </p>
-                        <p className="text-small-lg font-bold uppercase text-neutral lg:text-right">
-                          {dayjs(comment.created_at).format('MMM D, YYYY')}
-                        </p>
+                      <div className="pb-sm">
+                        <div className="flex flex-col justify-between lg:flex-row">
+                          <div className="flex flex-col">
+                            <p className="font-bold text-text">
+                              {comment.commenter_name}
+                            </p>
+                            <Link
+                              className="hidden text-small-lg text-neutral underline hover:text-secondary lg:block"
+                              href={`/reviews/${val.review_id}`}
+                            >
+                              Associated review
+                            </Link>
+                          </div>
+                          <p className="text-small-lg font-bold uppercase text-neutral lg:text-right">
+                            {dayjs(comment.created_at).format('MMM D, YYYY')}
+                          </p>
+                          <div className="lg:hidden">
+                            <Link
+                              className="text-small-lg text-neutral underline hover:text-secondary"
+                              href={`/reviews/${val.review_id}`}
+                            >
+                              Associated review
+                            </Link>
+                          </div>
+                        </div>
                       </div>
+
                       <p className="text-wrap pb-sm text-text">
                         {comment.content}
                       </p>
