@@ -1,5 +1,5 @@
 from django.db import connection
-from core.daos.utils import to_where, fetchall, fetchone, fetchone_as_dict, get
+from core.daos.utils import to_where, fetchall, fetchone, get
 from typing import List, Dict, Union, Literal
 
 
@@ -26,6 +26,7 @@ def reviews_select(
     course_number: str = None,
     professor_id: str = None,
     tags: List[str] = [],
+    id: str = None,
     limit: int = None,
     page: int = None,
     sort_order: str = "DESC",
@@ -39,6 +40,7 @@ def reviews_select(
         course_number: string - the number of the course
         professor_id: string - the id of the professor
         tags: List[str] - the tags of the review
+        id: string - the id of the review
         limit: int - the number of results to return per page; only effective if page is also provided
         page: int - the 1-indexed page number; only effective if limit is also provided
         sort_order: str - Sort by descending or ascending
@@ -50,6 +52,7 @@ def reviews_select(
     args = locals()
     page = args.pop("page")
     limit = args.pop("limit")
+    args.pop("id")
     sort_order = args.pop("sort_order")
     order_by = args.pop("order_by")
     query = """
@@ -62,10 +65,11 @@ def reviews_select(
     if order_by == "upvotes":
         query = sort_reviews_by_likes(query, sort_order, args)
     else:
-        query += to_where(**args)
+        query += to_where(**args) + to_where(table_name="r", id=id, prefix=False)
         query += f" ORDER BY r.{order_by} {sort_order}"
     if page and limit:
         query += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
+    args["id"] = id  # add back to args
     ret = fetchall(query, *list(filter(lambda x: x is not None, args.values())))
 
     for el in ret:
@@ -107,19 +111,6 @@ def review_select_upvotes(review_id):
 
 def review_select_comments(review_id):
     return get("comments", {"review_id": review_id})
-
-
-def review_select_one(review_id):
-    query = """
-        SELECT r.*, u.username AS reviewer_username, u.name AS reviewer_name
-        FROM reviews r
-        LEFT JOIN users u ON r.user_id = u.id
-        WHERE r.id = %s
-    """
-    ret = fetchone_as_dict(query, review_id)
-    if "tags" in ret:
-        ret["tags"] = process_tags(ret["tags"])
-    return ret
 
 
 def review_select_tags(
