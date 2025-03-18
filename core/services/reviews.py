@@ -5,7 +5,6 @@ from core.daos import (
     review_select_tags,
     review_select_comments,
     user_voted_review,
-    review_select_one,
 )
 
 
@@ -100,7 +99,7 @@ def get_review_comments(review_id: str):
 
 
 def get_review(review_id: str):
-    review = review_select_one(review_id)
+    review = reviews_select(id=review_id)[0]
     if review["is_user_anonymous"]:
         review["user_id"] = None
         review["reviewer_name"] = None
