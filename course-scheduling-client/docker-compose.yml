@@ -1,0 +1,10 @@
+name: next-client-prod
+services:
+  client:
+    build: 
+      dockerfile: Dockerfile
+      args:
+        - BASE_API_URL=${BASE_API_URL?REQUIRED}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
+    ports:
+      - 3000:3000

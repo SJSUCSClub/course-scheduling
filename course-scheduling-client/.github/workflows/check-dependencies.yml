@@ -1,0 +1,16 @@
+name: Check Dependencies
+
+on:
+  pull_request:
+    types: [opened, edited, closed, reopened, synchronize]
+
+jobs:
+  check_dependencies:
+    runs-on: ubuntu-latest
+    name: Check Dependencies
+    steps:
+      - uses: gregsdennis/dependencies-action@main
+        with:
+          custom-domains: my-custom-domain.io another.domain.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

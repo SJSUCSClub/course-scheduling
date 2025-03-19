@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-light-primary: 241 185 71;
+    --color-light-secondary: 119 164 215;
+    --color-light-accent: 183 208 237;
+    --color-light-background: 255 255 255;
+    --color-light-page: 255 255 255;
+    --color-light-text: 20 16 12;
+    --color-light-neutral: 150 150 150;
+    --color-light-important: 166 0 0;
+    --color-light-highlight: 241 241 241;
+    --color-light-good: 18 218 169;
+    --color-light-ok: 253 159 30;
+    --color-light-bad: 255 83 83;
+    --color-light-border: 215 215 215;
+    --color-light-hovered-border: 255 255 255;
+    --color-dark-primary: 241 185 71;
+    --color-dark-secondary: 119 164 215;
+    --color-dark-accent: 183 208 237;
+    --color-dark-background: 40 40 40;
+    --color-dark-page: 30 30 30;
+    --color-dark-text: 240 240 240;
+    --color-dark-neutral: 139 139 139;
+    --color-dark-important: 255 83 83;
+    --color-dark-highlight: 241 241 241;
+    --color-dark-good: 164 255 233;
+    --color-dark-ok: 255 222 176;
+    --color-dark-bad: 255 156 156;
+    --color-dark-border: 50 50 50;
+    --color-dark-hovered-border: 60 60 60;
+  }
+}
+
+html {
+  --color-primary: var(--color-light-primary);
+  --color-secondary: var(--color-light-secondary);
+  --color-accent: var(--color-light-accent);
+  --color-background: var(--color-light-background);
+  --color-page: var(--color-light-page);
+  --color-text: var(--color-light-text);
+  --color-neutral: var(--color-light-neutral);
+  --color-important: var(--color-light-important);
+  --color-highlight: var(--color-light-highlight);
+  --color-good: var(--color-light-good);
+  --color-ok: var(--color-light-ok);
+  --color-bad: var(--color-light-bad);
+  --color-border: var(--color-light-border);
+  --color-hovered-border: var(--color-light-hovered-border);
+}
+
+html.dark {
+  color-scheme: dark;
+  --color-primary: var(--color-dark-primary);
+  --color-secondary: var(--color-dark-secondary);
+  --color-accent: var(--color-dark-accent);
+  --color-background: var(--color-dark-background);
+  --color-page: var(--color-dark-page);
+  --color-text: var(--color-dark-text);
+  --color-neutral: var(--color-dark-neutral);
+  --color-important: var(--color-dark-important);
+  --color-highlight: var(--color-dark-highlight);
+  --color-good: var(--color-dark-good);
+  --color-ok: var(--color-dark-ok);
+  --color-bad: var(--color-dark-bad);
+  --color-border: var(--color-dark-border);
+  --color-hovered-border: var(--color-dark-hovered-border);
+}
+
+::selection {
+  background: rgb(var(--color-accent));
+}
