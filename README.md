@@ -1,4 +1,7 @@
-# course-scheduling
+
+
+
+# course-scheduling backend
 
 To get started, try out the docker compose. It requires that you have the following files in the project's root directory.
 
@@ -20,3 +23,11 @@ mkdir postgres_data
 ```
 
 Then, simply compose up the production docker compose.
+
+# course-scheduling frontend
+
+First, run the development server:
+
+```bash
+npm run dev
+```
