@@ -13,6 +13,9 @@ services:
       server:
         condition: service_healthy
         restart: true
+    links:
+      - client
+      - server
 
   client:
     build:
@@ -22,7 +25,7 @@ services:
       - 3000:3000
     environment:
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
-      - BASE_API_URL=${BASE_API_URL?REQUIRED}
+      - BASE_API_URL=http://server:8000
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -30,11 +33,13 @@ services:
       server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
-      retries: 5
+      retries: 10
       start_period: 10s
       timeout: 5s
+    links:
+      - server
 
   server:
     build:
@@ -61,6 +66,12 @@ services:
       - db
     volumes:
       - ./server:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/core/health"]
+      interval: 30s
+      retries: 10
+      start_period: 10s
+      timeout: 5s
 
   db:
     image: postgres:16-alpine
@@ -71,7 +82,7 @@ services:
     ports:
       - 5432:5432
     healthcheck:
-      test: ["CMD", "pg_isready -U ${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
