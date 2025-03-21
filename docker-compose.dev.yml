@@ -1,0 +1,83 @@
+name: django-postgres-dev
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      client:
+        condition: service_healthy
+        restart: true
+      server:
+        condition: service_healthy
+        restart: true
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    environment:
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
+      - BASE_API_URL=${BASE_API_URL?REQUIRED}
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER?REQUIRED}
+      - DB_PASSWORD=${DB_PASSWORD?REQUIRED}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID?REQUIRED}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET?REQUIRED}
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS?REQUIRED}
+      - FRONTEND_URL=${FRONTEND_URL?REQUIRED}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY?REQUIRED}
+      - DEBUG=true
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8000:8000
+    links:
+      - db
+    volumes:
+      - ./server:/app
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD?REQUIRED}
+      - POSTGRES_USER=${DB_USER?REQUIRED}
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - course_scheduling_db_data:/var/lib/postgresql/data
+      - ./createdb.sql:/docker-entrypoint-initdb.d/createdb.sql
+
+volumes:
+  course_scheduling_db_data:
