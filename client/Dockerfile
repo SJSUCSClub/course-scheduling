@@ -5,7 +5,7 @@ WORKDIR /client
 # install stage
 COPY package-lock.json package-lock.json
 COPY package.json package.json
-RUN npm i
+RUN npm ci
 
 # build stage
 COPY app app
