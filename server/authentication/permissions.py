@@ -47,7 +47,9 @@ class NotAuthenticatedPermission(BasePermission):
         if not access_token:
             return True
         res = checkToken(access_token)
-        return "error" in res or ""
+        if not res or "error" in res:
+            return False
+        return True
 
 
 class BaseAdminPermission(BasePermission):

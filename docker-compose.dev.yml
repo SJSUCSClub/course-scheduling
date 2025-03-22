@@ -1,3 +1,5 @@
+version: '3'
+
 name: django-postgres-dev
 services:
   nginx:
@@ -13,9 +15,6 @@ services:
       server:
         condition: service_healthy
         restart: true
-    links:
-      - client
-      - server
 
   client:
     build:
@@ -25,7 +24,7 @@ services:
       - 3000:3000
     environment:
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
-      - BASE_API_URL=http://server:8000
+      - BASE_API_URL=${BASE_API_URL?REQUIRED}
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -38,8 +37,6 @@ services:
       retries: 10
       start_period: 10s
       timeout: 5s
-    links:
-      - server
 
   server:
     build:
@@ -62,8 +59,6 @@ services:
         condition: service_healthy
     ports:
       - 8000:8000
-    links:
-      - db
     volumes:
       - ./server:/app
     healthcheck:
