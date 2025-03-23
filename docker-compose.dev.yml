@@ -1,5 +1,3 @@
-version: '3'
-
 name: django-postgres-dev
 services:
   nginx:
