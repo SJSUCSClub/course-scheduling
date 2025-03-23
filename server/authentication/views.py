@@ -48,7 +48,7 @@ def GoogleAuthorize(request: HttpRequest):
         CLIENT_SECRETS_FILE, scopes=SCOPES
     )
     # flow.redirect_uri = request.build_absolute_uri(reverse("oauth2callback"))
-    flow.redirect_uri = "http://localhost/api/google/oauth2callback"
+    flow.redirect_uri = "http://localhost:8000/google/oauth2callback"
     authorization_url, state = flow.authorization_url(
         access_type="offline", include_granted_scopes="true"
     )
