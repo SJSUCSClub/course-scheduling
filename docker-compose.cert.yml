@@ -16,3 +16,4 @@ services:
     command: certonly --webroot --webroot-path /var/www/certbot/ -d lenses.acmsjsu.org
     depends_on:
       - nginx:
+        condition: service_healthy
