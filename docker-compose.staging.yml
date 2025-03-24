@@ -1,5 +1,5 @@
-name: django-postgres-dev
 services:
+  services:
   nginx:
     image: nginx:latest
     ports:
@@ -7,7 +7,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx.staging.conf:/etc/nginx/nginx.conf:ro
-      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
     depends_on:
       client:
         condition: service_healthy
@@ -19,7 +19,7 @@ services:
   client:
     build:
       context: ./client
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     ports:
       - 3000:3000
     environment:
@@ -32,16 +32,16 @@ services:
       server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org:3000"]
       interval: 30s
       retries: 10
       start_period: 10s
       timeout: 5s
-
+      
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     environment:
       - DB_HOST=db
       - DB_PORT=5432
@@ -62,7 +62,7 @@ services:
     volumes:
       - ./server:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/core/health"]
+      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org:8000/core/health"]
       interval: 30s
       retries: 10
       start_period: 10s
