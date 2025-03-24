@@ -48,7 +48,7 @@ def GoogleAuthorize(request: HttpRequest):
         CLIENT_SECRETS_FILE, scopes=SCOPES
     )
     # flow.redirect_uri = request.build_absolute_uri(reverse("oauth2callback"))
-    flow.redirect_uri = "http://localhost:8000/google/oauth2callback"
+    flow.redirect_uri = os.getenv("REDIRECT_URI")
     authorization_url, state = flow.authorization_url(
         access_type="offline", include_granted_scopes="true"
     )
@@ -77,7 +77,7 @@ def oauth2callback(request: HttpRequest):
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES, state=state
     )
-    flow.redirect_uri = request.build_absolute_uri(reverse("oauth2callback"))
+    flow.redirect_uri = os.getenv("REDIRECT_URI")
     # flow.redirect_uri = f"{os.getenv('FRONTEND_URL')}/django/google/oauth2callback/"
     print("New redirect uri", flow.redirect_uri, file=sys.stderr)
     authorization_response = request.build_absolute_uri()
