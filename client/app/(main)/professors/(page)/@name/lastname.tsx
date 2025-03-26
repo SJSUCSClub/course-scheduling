@@ -11,7 +11,7 @@ const getKey =
   (pageIndex: number, previousPageData: ProfessorsSearchResponse) => {
     if (previousPageData && previousPageData.page === previousPageData.pages)
       return null;
-    return `/django/core/professors/search?startswith=${startswith}&page=${pageIndex + 1}&limit=9`;
+    return `/api/core/professors/search?startswith=${startswith}&page=${pageIndex + 1}&limit=9`;
   };
 
 interface LastNameDisplayProps {

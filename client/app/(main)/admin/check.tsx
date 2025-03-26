@@ -13,7 +13,7 @@ export const CheckWithoutProviders: React.FC<CheckProps> = ({
   justAdministrators,
 }) => {
   const { data, isLoading } = useSWR<AdminVerifyResponse>(
-    '/django/admin/verify',
+    '/api/admin/verify',
   );
 
   return isLoading ? (

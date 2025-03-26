@@ -23,12 +23,12 @@ export const Manage: React.FC = () => {
   const page = searchParams.get('page') ?? '1';
   urlSearchParams.set('page', page);
   const { data, mutate } = useSWR<AdminListResponse>(
-    `/django/admin/list?${urlSearchParams.toString()}`,
+    `/api/admin/list?${urlSearchParams.toString()}`,
   );
 
   // handle delete
   const handleDelete = async (user_id: string) => {
-    await fetch('/django/admin/manage-moderator', {
+    await fetch('/api/admin/manage-moderator', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const Manage: React.FC = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const handleAdd = async () => {
     setIsLoading(true);
-    await fetch('/django/admin/manage-moderator', {
+    await fetch('/api/admin/manage-moderator', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -16,7 +16,7 @@ const getKey =
   (pageIndex: number, previousPageData: ProfessorsIDReviewsResponse) => {
     if (previousPageData && previousPageData.page === previousPageData.pages)
       return null;
-    return `/django/core/professors/${id}/reviews?page=${pageIndex + 1}&${params}`;
+    return `/api/core/professors/${id}/reviews?page=${pageIndex + 1}&${params}`;
   };
 
 const Skeleton = () =>
@@ -74,7 +74,7 @@ const WriteReview = ({ id }: { id: string }) => {
       <LinkBtn
         variant="tertiary"
         className="w-fit px-sm"
-        href="/django/google/authorize"
+        href="/api/google/authorize"
       >
         Log in
       </LinkBtn>{' '}

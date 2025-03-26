@@ -54,7 +54,7 @@ const useFlaggedReviews = (page: string) => {
   const searchParams = new URLSearchParams();
   searchParams.append('page', page);
   return useSWR<AdminFlaggedReviewsResponse>(
-    '/django/admin/flagged-reviews?' + searchParams.toString(),
+    '/api/admin/flagged-reviews?' + searchParams.toString(),
   );
 };
 
@@ -64,7 +64,7 @@ const FlaggedReviewsView: React.FC<{ page: string }> = ({ page }) => {
   const [cookies] = useCookies(['csrftoken']);
   // TODO - show errors
   const handleAction = async (review_id: number, action: boolean) => {
-    await fetch(`/django/admin/reviews/${review_id}/manage`, {
+    await fetch(`/api/admin/reviews/${review_id}/manage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ const useFlaggedComments = (page: string) => {
   const searchParams = new URLSearchParams();
   searchParams.append('page', page);
   return useSWR<AdminFlaggedCommentsResponse>(
-    '/django/admin/flagged-comments?' + searchParams.toString(),
+    '/api/admin/flagged-comments?' + searchParams.toString(),
   );
 };
 const FlaggedCommentsView: React.FC<{ page: string }> = ({ page }) => {
@@ -187,7 +187,7 @@ const FlaggedCommentsView: React.FC<{ page: string }> = ({ page }) => {
   const [cookies] = useCookies(['csrftoken']);
   // TODO - show errors
   const handleAction = async (comment_id: number, action: boolean) => {
-    await fetch(`/django/admin/comments/${comment_id}/manage`, {
+    await fetch(`/api/admin/comments/${comment_id}/manage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
