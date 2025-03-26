@@ -88,7 +88,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
 
   const handleReportComment = (e: React.FormEvent<HTMLFormElement>) => {
     if (!props.isAuthenticated) {
-      router.push('/django/google/authorize');
+      router.push('/api/google/authorize');
       return;
     }
     e.preventDefault();
@@ -98,7 +98,7 @@ const CommentWithoutProviders: React.FC<CommentProps> = ({
       comment_id: comment.id,
       reason,
     };
-    fetch(`/django/core/users/flagged_comments`, {
+    fetch(`/api/core/users/flagged_comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -224,7 +224,7 @@ interface CommentsProps {
 const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
   const { data, error, isLoading, isValidating, mutate } =
     useSWR<ReviewsIDCommentsResponse>(
-      `/django/core/reviews/${props.reviewId}/comments`,
+      `/api/core/reviews/${props.reviewId}/comments`,
     );
   const [cookies] = useCookies(['csrftoken']);
   const handleAddComment = (e: React.FormEvent<HTMLFormElement>) => {
@@ -243,7 +243,7 @@ const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
     const newData = data ? [...data, newComment] : [newComment];
     mutate(
       async () => {
-        await fetch(`/django/core/users/comments`, {
+        await fetch(`/api/core/users/comments`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -273,7 +273,7 @@ const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
     mutate(
       async () => {
         await fetch(
-          `/django/core/users/reviews/comments?${requestParams.toString()}`,
+          `/api/core/users/reviews/comments?${requestParams.toString()}`,
           {
             method: 'DELETE',
             headers: {
@@ -339,7 +339,7 @@ const CommentsWithoutProviders: React.FC<CommentsProps> = (props) => {
           <LinkBtn
             variant="tertiary"
             className="w-fit px-sm"
-            href="/django/google/authorize"
+            href="/api/google/authorize"
           >
             Log in
           </LinkBtn>{' '}
@@ -385,7 +385,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
   const [cookies] = useCookies(['csrftoken']);
   const handleUpvote = () => {
     if (!isAuthenticated) {
-      router.push('/django/google/authorize');
+      router.push('/api/google/authorize');
       return;
     }
     setIsUpvoted(!isUpvoted);
@@ -393,7 +393,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
   };
   const handleDownvote = () => {
     if (!isAuthenticated) {
-      router.push('/django/google/authorize');
+      router.push('/api/google/authorize');
       return;
     }
     setIsDownvoted(!isDownvoted);
@@ -401,7 +401,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
   };
   React.useEffect(() => {
     if (!isAuthenticated) return;
-    fetch(`/django/core/users/vote`, {
+    fetch(`/api/core/users/vote`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -418,7 +418,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
     });
   }, [isUpvoted, isDownvoted, cookies.csrftoken, props.id, isAuthenticated]);
   const handleDelete = () => {
-    fetch(`/django/core/users/reviews/${props.id}`, {
+    fetch(`/api/core/users/reviews/${props.id}`, {
       method: 'DELETE',
       headers: {
         'X-CSRFToken': cookies.csrftoken,
@@ -432,7 +432,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
   };
   const handleReport = (e: React.FormEvent<HTMLFormElement>) => {
     if (!isAuthenticated) {
-      router.push('/django/google/authorize');
+      router.push('/api/google/authorize');
       return;
     }
     e.preventDefault();
@@ -442,7 +442,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
       review_id: props.id,
       reason,
     };
-    fetch(`/django/core/users/flagged_reviews`, {
+    fetch(`/api/core/users/flagged_reviews`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

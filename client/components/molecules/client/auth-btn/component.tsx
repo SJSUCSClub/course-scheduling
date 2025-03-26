@@ -19,7 +19,7 @@ export const AuthBtn: React.FC<Props> = ({ ...props }) => {
       <LinkBtn
         prefetch={false}
         {...props}
-        href="/django/google/logout"
+        href="/api/google/logout"
         variant="ghost"
       >
         Sign out
@@ -30,7 +30,7 @@ export const AuthBtn: React.FC<Props> = ({ ...props }) => {
     <LinkBtn
       {...props}
       prefetch={false}
-      href="/django/google/authorize"
+      href="/api/google/authorize"
       className="!gap-sm bg-background text-text"
       variant="primary"
     >

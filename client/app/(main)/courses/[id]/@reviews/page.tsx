@@ -15,7 +15,7 @@ const getKey =
   (pageIndex: number, previousPageData: CoursesIDReviewsResponse) => {
     if (previousPageData && previousPageData.page === previousPageData.pages)
       return null;
-    return `/django/core/courses/${id}/reviews?page=${pageIndex + 1}&${params}`;
+    return `/api/core/courses/${id}/reviews?page=${pageIndex + 1}&${params}`;
   };
 
 const Skeleton = () =>
