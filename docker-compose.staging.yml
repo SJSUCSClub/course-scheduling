@@ -20,8 +20,8 @@ services:
       context: ./client
       dockerfile: Dockerfile.prod
       args:
-        NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
-        BASE_API_URL=${BASE_API_URL?REQUIRED}
+        - BASE_API_URL=${BASE_API_URL?REQUIRED}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
     ports:
       - 3000:3000
     environment:
