@@ -34,6 +34,12 @@ services:
       - 8000:8000
     volumes:
       - ./server:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org:8000/core/health"]
+      interval: 30s
+      retries: 10
+      start_period: 10s
+      timeout: 5s
 
   db:
     image: postgres:16-alpine
