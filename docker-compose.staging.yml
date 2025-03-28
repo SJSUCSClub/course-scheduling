@@ -21,9 +21,6 @@ services:
         - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
     ports:
       - 3000:3000
-    environment:
-      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
-      - BASE_API_URL=${BASE_API_URL?REQUIRED}
     volumes:
       - ./client:/app
       - /app/node_modules
@@ -48,12 +45,10 @@ services:
       - DB_PASSWORD=${DB_PASSWORD?REQUIRED}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID?REQUIRED}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET?REQUIRED}
-      - OAUTHLIB_INSECURE_TRANSPORT=1
       - ALLOWED_HOSTS=${ALLOWED_HOSTS?REQUIRED}
       - FRONTEND_URL=${FRONTEND_URL?REQUIRED}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY?REQUIRED}
       - REDIRECT_URI=${REDIRECT_URI?REQUIRED}
-      - DEBUG=true
     depends_on:
       db:
         condition: service_healthy
