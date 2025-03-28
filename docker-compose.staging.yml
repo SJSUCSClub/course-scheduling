@@ -10,6 +10,9 @@ services:
       server:
         condition: service_healthy
         restart: true
+      client:
+        condition: service_healthy
+        restart: true
 
   client:
     build:
