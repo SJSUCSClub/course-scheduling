@@ -2,7 +2,6 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       - ./nginx.stagingbuild.conf:/etc/nginx/nginx.conf:ro
