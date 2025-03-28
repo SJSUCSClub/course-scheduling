@@ -33,7 +33,7 @@ services:
       nginx:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org"]
+      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org:3000"]
       interval: 30s
       retries: 10
       start_period: 10s
@@ -63,7 +63,7 @@ services:
     volumes:
       - ./server:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org/api/core/health"]
+      test: ["CMD", "curl", "-f", "http://lenses.acmsjsu.org:8000/core/health"]
       interval: 30s
       retries: 10
       start_period: 10s
