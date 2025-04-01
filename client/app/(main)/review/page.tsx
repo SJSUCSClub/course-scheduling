@@ -1,19 +1,26 @@
-import { Btn, Card, Select, Tag, Textarea } from '@/components/atoms';
+import { Btn, Card, LinkBtn, Select, Tag, Textarea } from '@/components/atoms';
 import { FilterGroup, SearchBar } from '@/components/molecules';
-import { CoursesSearchResponse } from '@/types';
+import { CoursesSearchResponse, ProfessorsSearchResponse } from '@/types';
 import fetcher from '@/utils/fetcher';
 import { formatName } from '@/utils/format-name';
 import { getServerSession } from '@/utils/get-server-session';
+import { ChevronRightIcon } from '@heroicons/react/16/solid';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: { professor_id: string };
+  searchParams: { professor_id: string; course_id: string };
 }): Promise<Metadata> {
   return {
-    title: `Review ${formatName(searchParams.professor_id)}`,
+    title: searchParams.professor_id
+      ? `Review ${formatName(searchParams.professor_id)}`
+      : searchParams.course_id
+        ? `Review ${searchParams.course_id}`
+        : 'Write a Review',
   };
 }
 
@@ -22,6 +29,7 @@ export default async function Page({
 }: {
   searchParams: {
     review_id: string;
+    professor_query: string;
     course_query: string;
     professor_id: string;
     course_id: string;
@@ -32,19 +40,112 @@ export default async function Page({
     take_again: boolean;
     tags: string[];
     is_user_anonymous: boolean;
+    submit: boolean;
   };
 }) {
   const session = getServerSession();
   if (!session) {
     redirect(process.env.BASE_API_URL + '/google/authorize');
   }
-  const requestParams = new URLSearchParams();
+
+  // Review Submitted
+  if (searchParams.submit) {
+    const body = {
+      professor_id: searchParams.professor_id,
+      course_number: searchParams.course_id
+        ? searchParams.course_id.split('-')[1]
+        : undefined,
+      department: searchParams.course_id
+        ? searchParams.course_id.split('-')[0]
+        : undefined,
+      content: searchParams.review,
+      quality: searchParams.quality,
+      ease: searchParams.ease,
+      grade: searchParams.grade,
+      tags: Array.isArray(searchParams.tags)
+        ? searchParams.tags
+        : searchParams.tags
+          ? [searchParams.tags]
+          : [],
+      take_again: searchParams.take_again,
+      is_user_anonymous: searchParams.is_user_anonymous,
+    };
+    await fetcher(
+      process.env.BASE_API_URL +
+        `/core/users/reviews${searchParams.review_id ? '/' + searchParams.review_id : ''}`,
+      {
+        method: searchParams.review_id ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: cookies().toString(),
+          'X-CSRFToken': cookies().get('csrftoken')?.value ?? '',
+          Referer: process.env.NEXT_PUBLIC_BASE_URL || '',
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    return (
+      <main>
+        <section className="mx-auto flex w-full max-w-content-width items-stretch px-md">
+          <div className="flex w-full flex-col items-center gap-xxl py-xxl">
+            <div className="flex flex-col items-stretch">
+              <h1 className="pb-sm text-center max-lg:text-h1-mobile-sm lg:text-h1-desktop-sm">
+                Review {searchParams.review_id ? 'Updated' : 'Submitted'}!
+              </h1>
+              <p className="pb-xxl text-center lg:text-h5-desktop">
+                Thank you for reviewing Professor{' '}
+                <Link
+                  className="w-fit rounded-sm text-text underline hover:text-secondary"
+                  href={`/professors/${searchParams.professor_id}`}
+                >
+                  {searchParams.professor_id
+                    .split('.')
+                    .map((p) => p[0].toUpperCase() + p.slice(1))
+                    .join(' ')}
+                </Link>
+                ! We appreciate your feedback.
+              </p>
+              <div className="flex min-w-min flex-wrap justify-center gap-md pb-xl">
+                <LinkBtn variant="ghost" href="/profile">
+                  Go to Profile
+                  <ChevronRightIcon width={20} height={20} />
+                </LinkBtn>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  // Fetch professors
+  const professorsRequestParams = new URLSearchParams();
+  searchParams.professor_query &&
+    professorsRequestParams.append('query', searchParams.professor_query);
+  professorsRequestParams.append('limit', '10');
+  const { items: professors } = (await fetcher(
+    process.env.BASE_API_URL +
+      `/core/professors/search?${professorsRequestParams.toString()}`,
+  )) as ProfessorsSearchResponse;
+  const unselectedProfessors =
+    professors.map((professor) => professor.id) ?? [];
+  const professorsValues = Array.from(
+    new Set(
+      searchParams.professor_id
+        ? [searchParams.professor_id, ...unselectedProfessors]
+        : unselectedProfessors,
+    ),
+  );
+
+  // Fetch courses
+  const coursesRequestParams = new URLSearchParams();
   searchParams.course_query &&
-    requestParams.append('query', searchParams.course_query);
-  requestParams.append('limit', '10');
+    coursesRequestParams.append('query', searchParams.course_query);
+  coursesRequestParams.append('limit', '10');
   const { items: courses } = (await fetcher(
     process.env.BASE_API_URL +
-      `/core/courses/search?${requestParams.toString()}`,
+      `/core/courses/search?${coursesRequestParams.toString()}`,
   )) as CoursesSearchResponse;
   const unselectedCourses =
     courses.map((course) => `${course.department}-${course.course_number}`) ??
@@ -62,17 +163,36 @@ export default async function Page({
       <section className="mx-auto w-full max-w-content-width px-md pb-lg pt-xxl">
         <div>
           <h1 className="pb-xs max-lg:text-h3-mobile lg:text-h3-desktop">
-            Review{' '}
-            {searchParams.professor_id
-              .split('.')
-              .map((p) => p[0].toUpperCase() + p.slice(1))
-              .join(' ')}
+            Write a Review
           </h1>
           <h2 className="pb-xl text-neutral max-lg:text-h5-mobile lg:text-h5-desktop">
             Share your experience to help fellow students choose the right
             professor.
           </h2>
         </div>
+        <Card className="mb-lg p-lg">
+          <label>
+            <p className="pb-sm">
+              Pick a Professor<span className="pl-xs text-important">*</span>
+            </p>
+            <div className="pb-lg">
+              <SearchBar
+                param="professor_query"
+                shouldResetPageOnChange={false}
+              />
+            </div>
+            {professorsValues.length ? (
+              <FilterGroup
+                variant="radio"
+                param="professor_id"
+                values={professorsValues}
+                shouldResetPageOnChange={false}
+              />
+            ) : (
+              <p className="text-neutral">No professors found</p>
+            )}
+          </label>
+        </Card>
         <Card className="mb-lg p-lg">
           <label>
             <p className="pb-sm">
@@ -93,11 +213,9 @@ export default async function Page({
             )}
           </label>
         </Card>
-        <form
-          action="/professors/review/success"
-          className="flex flex-col gap-md"
-        >
+        <form action="/review" className="flex flex-col gap-md">
           <Card className="flex flex-col gap-md p-lg">
+            <input type="hidden" name="submit" value="true" />
             <input
               type="hidden"
               name="review_id"
@@ -110,21 +228,8 @@ export default async function Page({
             />
             <input
               type="hidden"
-              name="course_number"
-              value={
-                searchParams.course_id
-                  ? searchParams.course_id.split('-')[1]
-                  : undefined
-              }
-            />
-            <input
-              type="hidden"
-              name="department"
-              value={
-                searchParams.course_id
-                  ? searchParams.course_id.split('-')[0]
-                  : undefined
-              }
+              name="course_id"
+              value={searchParams.course_id}
             />
             <label className="pb-md">
               <p className="pb-sm">
@@ -279,7 +384,7 @@ export default async function Page({
               </p>
               <Textarea
                 minLength={40}
-                name="content"
+                name="review"
                 className="w-full"
                 defaultValue={searchParams.review}
                 required
@@ -321,7 +426,7 @@ export default async function Page({
             </label>
           </Card>
           <Btn
-            disabled={!searchParams.course_id}
+            disabled={!searchParams.course_id || !searchParams.professor_id}
             variant="primary"
             type="submit"
             className="justify-center text-center"

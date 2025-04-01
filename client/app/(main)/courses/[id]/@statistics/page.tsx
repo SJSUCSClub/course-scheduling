@@ -1,4 +1,4 @@
-import { Card, Stars } from '@/components/atoms';
+import { Card, LinkBtn, Stars } from '@/components/atoms';
 import { ParamSelect } from '@/components/molecules';
 import StatCard from '@/components/molecules/stat-card';
 import { BarChart } from '@/components/organisms';
@@ -11,6 +11,7 @@ import fetcher from '@/utils/fetcher';
 import getEvaluation from '@/utils/get-evaluation';
 import roundToTenth from '@/utils/round-to-tenth';
 import {
+  ChevronRightIcon,
   ClipboardDocumentCheckIcon,
   PuzzlePieceIcon,
   Square2StackIcon,
@@ -181,6 +182,12 @@ export default async function Page({
             </StatCard>
           )}
         </div>
+      </div>
+      <div className="flex min-w-min flex-wrap justify-center gap-md pb-xl">
+        <LinkBtn variant="primary" href={`/review?course_id=${params.id}`}>
+          Write a Review
+          <ChevronRightIcon width={20} height={20} />
+        </LinkBtn>
       </div>
       <div className="flex gap-md pb-md max-lg:flex-col">
         <Card className="p-lg max-lg:w-full lg:flex-1">

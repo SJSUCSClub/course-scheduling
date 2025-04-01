@@ -182,10 +182,7 @@ export default async function Page({
         </div>
       ) : null}
       <div className="flex min-w-min flex-wrap justify-center gap-md pb-xl">
-        <LinkBtn
-          variant="primary"
-          href={`/professors/review?professor_id=${params.id}`}
-        >
+        <LinkBtn variant="primary" href={`/review?professor_id=${params.id}`}>
           Write a Review
           <ChevronRightIcon width={20} height={20} />
         </LinkBtn>
