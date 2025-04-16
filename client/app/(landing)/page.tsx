@@ -7,6 +7,7 @@ import {
   IdentificationIcon,
   MagnifyingGlassIcon,
   Square2StackIcon,
+  CalendarIcon
 } from '@heroicons/react/24/solid';
 import { AuthBtn, ProfileBtn } from '@/components/molecules';
 import SessionWrapper from '@/wrappers/session-provider';
@@ -24,6 +25,12 @@ export default function Page() {
               </LinkBtn>
               <LinkBtn href="/professors" variant="tertiary">
                 Professors
+              </LinkBtn>
+              <LinkBtn
+                href="/schedules/search"
+                variant="tertiary"
+              >
+                Schedules
               </LinkBtn>
               <LinkBtn href="/compare" variant="tertiary">
                 Compare
@@ -77,7 +84,7 @@ export default function Page() {
             href="/courses"
             aria-label="Browse Courses"
           >
-            <Card className="w-full p-xl">
+            <Card className="w-full h-full p-xl">
               <div className="text-secondary">
                 <MagnifyingGlassIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
@@ -95,7 +102,7 @@ export default function Page() {
             href="/professors"
             aria-label="Review Professors"
           >
-            <Card className="w-full p-xl">
+            <Card className="w-full h-full p-xl">
               <div className="text-primary">
                 <IdentificationIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
@@ -110,10 +117,28 @@ export default function Page() {
           <LinkBtn
             variant="tertiary"
             className="flex-1 p-0 text-inherit"
+            href="/schedules/search"
+            aria-label="View Schedules"
+          >
+            <Card className="w-full h-full p-xl">
+              <div className="text-accent">
+                <CalendarIcon width={24} height={24} />
+                <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
+                   View Schedules
+                </h3>
+              </div>
+              <p className="text-p text-neutral">
+                View all SJSU schedules for this semester.{' '}
+              </p>
+            </Card>
+          </LinkBtn>
+          <LinkBtn
+            variant="tertiary"
+            className="flex-1 p-0 text-inherit"
             href="/compare"
             aria-label="Compare"
           >
-            <Card className="w-full p-xl">
+            <Card className="w-full h-full p-xl">
               <div className="text-good">
                 <Square2StackIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
