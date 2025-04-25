@@ -7,48 +7,15 @@ import {
   IdentificationIcon,
   MagnifyingGlassIcon,
   Square2StackIcon,
-  CalendarIcon
+  CalendarIcon,
 } from '@heroicons/react/24/solid';
-import { AuthBtn, ProfileBtn } from '@/components/molecules';
-import SessionWrapper from '@/wrappers/session-provider';
 import { titlingGothicFB } from '../fonts';
+import { Navbar } from '@/components/organisms';
 
 export default function Page() {
   return (
     <main className="relative">
-      <header className="mx-auto flex w-full max-w-content-width items-center justify-between gap-xl px-lg py-md">
-        <ul className="flex w-full flex-wrap items-center justify-center gap-lg">
-          <li>
-            <nav className="flex">
-              <LinkBtn href="/courses" variant="tertiary">
-                Courses
-              </LinkBtn>
-              <LinkBtn href="/professors" variant="tertiary">
-                Professors
-              </LinkBtn>
-              <LinkBtn
-                href="/schedules/search"
-                variant="tertiary"
-              >
-                Schedules
-              </LinkBtn>
-              <LinkBtn href="/compare" variant="tertiary">
-                Compare
-              </LinkBtn>
-            </nav>
-          </li>
-          <li>
-            <nav className="flex gap-x-sm">
-              <SessionWrapper>
-                <ProfileBtn />
-              </SessionWrapper>
-              <SessionWrapper>
-                <AuthBtn />
-              </SessionWrapper>
-            </nav>
-          </li>
-        </ul>
-      </header>
+      <Navbar landing />
       <section className="mx-auto w-full max-w-content-width px-md py-xxl">
         <div className="flex items-center justify-center gap-[3rem] overflow-visible max-lg:flex-col max-lg:px-xl max-lg:pb-xl max-lg:pt-md lg:px-[56px] lg:py-[56px]">
           <div className="flex flex-col gap-lg max-lg:items-center">
@@ -68,12 +35,7 @@ export default function Page() {
             <NavSearchBar />
           </div>
           <SplineNext
-            style={{
-              width: '350px',
-              objectFit: 'cover',
-              height: '300px',
-              marginLeft: '4rem',
-            }}
+            className="max-h-[300px] max-w-[350px] max-lg:aspect-square max-lg:w-full max-[420px]:hidden lg:ml-16 lg:min-h-[300px] lg:min-w-[350px]"
             scene="https://prod.spline.design/zxtbNi7bvatFum9j/scene.splinecode"
           />
         </div>
@@ -84,7 +46,7 @@ export default function Page() {
             href="/courses"
             aria-label="Browse Courses"
           >
-            <Card className="w-full h-full p-xl">
+            <Card className="h-full w-full p-xl">
               <div className="text-secondary">
                 <MagnifyingGlassIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
@@ -102,7 +64,7 @@ export default function Page() {
             href="/professors"
             aria-label="Review Professors"
           >
-            <Card className="w-full h-full p-xl">
+            <Card className="h-full w-full p-xl">
               <div className="text-primary">
                 <IdentificationIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
@@ -120,11 +82,11 @@ export default function Page() {
             href="/schedules/search"
             aria-label="View Schedules"
           >
-            <Card className="w-full h-full p-xl">
+            <Card className="h-full w-full p-xl">
               <div className="text-accent">
                 <CalendarIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
-                   View Schedules
+                  View Schedules
                 </h3>
               </div>
               <p className="text-p text-neutral">
@@ -138,7 +100,7 @@ export default function Page() {
             href="/compare"
             aria-label="Compare"
           >
-            <Card className="w-full h-full p-xl">
+            <Card className="h-full w-full p-xl">
               <div className="text-good">
                 <Square2StackIcon width={24} height={24} />
                 <h3 className="pb-sm pt-md !font-semibold lg:text-h6-desktop">
