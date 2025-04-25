@@ -35,12 +35,7 @@ export default function Page() {
             <NavSearchBar />
           </div>
           <SplineNext
-            style={{
-              width: '350px',
-              objectFit: 'cover',
-              height: '300px',
-              marginLeft: '4rem',
-            }}
+            className="max-h-[300px] max-w-[350px] max-lg:aspect-square max-lg:w-full max-[420px]:hidden lg:ml-16 lg:min-h-[300px] lg:min-w-[350px]"
             scene="https://prod.spline.design/zxtbNi7bvatFum9j/scene.splinecode"
           />
         </div>
