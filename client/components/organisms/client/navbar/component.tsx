@@ -16,7 +16,11 @@ import SessionWrapper from '@/wrappers/session-provider';
 import { AuthBtn, NavSearchBar, ProfileBtn } from '@/components/molecules';
 import { cn } from '@/utils/cn';
 
-export const Navbar: React.FC = () => {
+interface Props {
+  landing?: boolean;
+}
+
+export const Navbar: React.FC<Props> = ({ landing }) => {
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isShownSearch, setIsShownSearch] = React.useState(false);
   const toggleMenu = () => {
@@ -27,35 +31,50 @@ export const Navbar: React.FC = () => {
     !isOpenMenu && setIsShownSearch(!isShownSearch);
   };
   return (
-    <div className="w-full bg-background">
-      <header className="mx-auto flex w-full max-w-content-width items-center justify-between gap-xl bg-background max-lg:fixed max-lg:z-50 max-lg:min-h-[80px] max-lg:border-b-2 max-lg:border-border max-lg:px-md max-lg:py-md lg:px-lg lg:py-md">
-        <Btn
-          className="rounded-sm p-0 lg:hidden"
-          variant="tertiary"
-          onClick={toggleSearch}
-          disabled={isOpenMenu}
-        >
-          {isShownSearch ? (
-            <ChevronLeftIcon width={24} height={24} />
-          ) : (
-            <MagnifyingGlassIcon width={24} height={24} />
-          )}
-        </Btn>
+    <div className={cn('w-full', { 'bg-background': !landing })}>
+      <header
+        className={cn(
+          'mx-auto flex w-full max-w-content-width items-center gap-xl max-lg:fixed max-lg:z-50 max-lg:min-h-[80px] max-lg:px-md max-lg:py-md lg:px-lg lg:py-md',
+          {
+            'justify-between bg-background max-lg:border-b-2 max-lg:border-border':
+              !landing,
+            'max-lg:justify-end max-lg:transition-all lg:justify-center':
+              landing,
+            'max-lg:bg-background': landing && isOpenMenu,
+          },
+        )}
+      >
+        {!landing ? (
+          <>
+            <Btn
+              className="rounded-sm p-0 lg:hidden"
+              variant="tertiary"
+              onClick={toggleSearch}
+              disabled={isOpenMenu}
+            >
+              {isShownSearch ? (
+                <ChevronLeftIcon width={24} height={24} />
+              ) : (
+                <MagnifyingGlassIcon width={24} height={24} />
+              )}
+            </Btn>
 
-        {/* Logo */}
-        <Link
-          className={cn({ 'max-lg:hidden': isShownSearch })}
-          href="/"
-          onClick={() => setIsOpenMenu(false)}
-        >
-          {/* Desktop Logo */}
-          <Image src={logo} alt="logo" />
-        </Link>
+            {/* Logo */}
+            <Link
+              className={cn({ 'max-lg:hidden': isShownSearch })}
+              href="/"
+              onClick={() => setIsOpenMenu(false)}
+            >
+              {/* Desktop Logo */}
+              <Image src={logo} alt="logo" />
+            </Link>
 
-        {/* Search Bar */}
-        <div className={cn('flex-1', { 'max-lg:hidden': !isShownSearch })}>
-          <NavSearchBar />
-        </div>
+            {/* Search Bar */}
+            <div className={cn('flex-1', { 'max-lg:hidden': !isShownSearch })}>
+              <NavSearchBar />
+            </div>
+          </>
+        ) : null}
 
         {/* Mobile Menu Toggle */}
         <Btn
@@ -118,7 +137,9 @@ export const Navbar: React.FC = () => {
           </li>
         </ul>
       </header>
-      <hr className="w-full border-b-2 border-border max-lg:hidden" />
+      {!landing ? (
+        <hr className="w-full border-b-2 border-border max-lg:hidden" />
+      ) : null}
       {/* Mobile Nav Spacer */}
       <div className="h-[80px] lg:hidden" />
     </div>
