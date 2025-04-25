@@ -15,7 +15,7 @@ class TokenRefreshMiddleware:
     def __call__(self, request):
 
         # only user endpoints will refresh tokens when accessed
-        if not request.path.startswith("/core/users/"):
+        if not request.path.startswith("/core/users/") and not request.path.startswith("/google/logout"):
             return self.get_response(request)
         access_token = request.COOKIES.get("access_token")
         if access_token:

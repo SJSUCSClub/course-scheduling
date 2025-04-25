@@ -48,7 +48,7 @@ def GoogleAuthorize(request: HttpRequest):
     )
     flow.redirect_uri = os.getenv("REDIRECT_URI")
     authorization_url, state = flow.authorization_url(
-        access_type="offline", include_granted_scopes="true"
+        access_type="offline", include_granted_scopes="true",prompt="consent"
     )
 
     request.session["state"] = state
