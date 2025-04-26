@@ -98,8 +98,11 @@ def get_review_comments(review_id: str):
     return review_select_comments(review_id)
 
 
-def get_review(review_id: str):
+def get_review(review_id: str, user_id=None):
     review = reviews_select(id=review_id)[0]
+    votes = review_select_upvotes(review["id"])
+    review["votes"] = votes
+    review["user_vote"] = user_voted_review(user_id=user_id, review_id=review["id"])
     if review["is_user_anonymous"]:
         review["user_id"] = None
         review["reviewer_name"] = None
