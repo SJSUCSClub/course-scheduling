@@ -22,7 +22,14 @@ const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
   if (!res.ok) {
     const error = new FetchError('An error occurred while fetching the data.');
     // Attach extra info to the error object.
-    error.info = await res.json();
+    const response = await res.json();
+    error.info = response;
+    if (response.message) {
+      error.message = response.message;
+    }
+    if (response.error) {
+      error.message = response.error;
+    }
     error.status = res.status;
     console.error(error);
     throw error;
