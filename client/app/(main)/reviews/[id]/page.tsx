@@ -27,13 +27,12 @@ export default async function Page({ params }: { params: { id: string } }) {
         grade={data.grade}
         tags={data.tags}
         takeAgain={data.take_again}
-        votes={{ upvotes: 0, downvotes: 0 }}
+        votes={data.votes}
         userId={data.user_id}
         id={data.id.toString()}
         userVote={data.user_vote}
         professorId={data.professor_id}
         courseId={`${data.department}-${data.course_number}`}
-        isShownInteractions={false}
       />
     </main>
   );

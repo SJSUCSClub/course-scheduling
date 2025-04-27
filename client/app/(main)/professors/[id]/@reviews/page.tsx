@@ -51,7 +51,7 @@ const WriteReview = ({ id }: { id: string }) => {
   const session = useSession();
   const isAuthenticated = session !== null;
   return isAuthenticated ? (
-    <form action="/professors/review" className="flex gap-sm">
+    <form action="/review" className="flex gap-sm">
       <input type="hidden" name="professor_id" value={id} />
       <Textarea
         className="w-full"

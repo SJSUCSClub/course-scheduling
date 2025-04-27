@@ -9,9 +9,11 @@ import SessionProvider, { useSession } from '@/wrappers/session-provider';
 import SWRConfigProvider from '@/wrappers/swr-config';
 import {
   ChatBubbleOvalLeftIcon,
+  ClipboardIcon,
   FlagIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
+  ShareIcon,
 } from '@heroicons/react/24/outline';
 import {
   ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid,
@@ -646,7 +648,7 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
                     <LinkBtn
                       className="gap-sm rounded-sm p-0"
                       variant="tertiary"
-                      href={`/professors/review?${editParams.toString()}`}
+                      href={`/review?${editParams.toString()}`}
                     >
                       <PencilIcon width={24} height={24} />
                     </LinkBtn>
@@ -766,6 +768,42 @@ export const ReviewWithoutProviders: React.FC<Props> = ({
                     )}
                   </Card>
                 </dialog>
+                {typeof window !== 'undefined' &&
+                navigator &&
+                navigator?.share ? (
+                  <Btn
+                    className="gap-sm rounded-sm p-0"
+                    variant="tertiary"
+                    onClick={() =>
+                      navigator.share({
+                        title: `${props.title} Review`,
+                        text: `Check out this review on ${props.title}!`,
+                        url: `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/${props.id}`,
+                      })
+                    }
+                  >
+                    <ShareIcon width={24} height={24} />
+                  </Btn>
+                ) : (
+                  <Btn
+                    className="gap-sm rounded-sm p-0"
+                    variant="tertiary"
+                    onClick={() => {
+                      navigator.clipboard
+                        .writeText(
+                          `${process.env.NEXT_PUBLIC_BASE_URL}/reviews/${props.id}`,
+                        )
+                        .then(() => {
+                          alert('Link copied to clipboard!');
+                        })
+                        .catch(() => {
+                          alert('Failed to copy link to clipboard.');
+                        });
+                    }}
+                  >
+                    <ClipboardIcon width={24} height={24} />
+                  </Btn>
+                )}
               </div>
             </div>
           ) : null}

@@ -1,72 +1,151 @@
-import { Btn, Card, Select, Tag, Textarea } from '@/components/atoms';
-import { FilterGroup, SearchBar } from '@/components/molecules';
-import { CoursesSearchResponse } from '@/types';
-import fetcher from '@/utils/fetcher';
-import { formatName } from '@/utils/format-name';
-import { getServerSession } from '@/utils/get-server-session';
-import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+'use client';
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: { professor_id: string };
-}): Promise<Metadata> {
-  return {
-    title: `Review ${formatName(searchParams.professor_id)}`,
-  };
+import { Btn, Card, LinkBtn, Select, Tag, Textarea } from '@/components/atoms';
+import { FilterGroup, SearchBar } from '@/components/molecules';
+import { CoursesSearchResponse, ProfessorsSearchResponse } from '@/types';
+import fetcher, { FetchError } from '@/utils/fetcher';
+import SWRConfigProvider from '@/wrappers/swr-config';
+import { ChevronRightIcon } from '@heroicons/react/16/solid';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import React from 'react';
+import { CookiesProvider, useCookies } from 'react-cookie';
+import useSWR from 'swr';
+
+function groupByKey<T>(entries: [string, T][]): Record<string, T | T[]> {
+  return entries.reduce<Record<string, T | T[]>>((acc, [key, value]) => {
+    if (acc[key] === undefined) {
+      acc[key] = value;
+    } else if (!(acc[key] instanceof Array)) {
+      acc[key] = [acc[key] as T, value];
+    }
+    // If we've already converted it to an array, just push the new value
+    else {
+      (acc[key] as T[]).push(value);
+    }
+    return acc;
+  }, {});
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {
-    review_id: string;
-    course_query: string;
-    professor_id: string;
-    course_id: string;
-    review: string;
-    quality: number;
-    ease: number;
-    grade: string;
-    take_again: boolean;
-    tags: string[];
-    is_user_anonymous: boolean;
-  };
-}) {
-  const session = getServerSession();
-  if (!session) {
-    redirect(process.env.BASE_API_URL + '/google/authorize');
-  }
-  const requestParams = new URLSearchParams();
-  searchParams.course_query &&
-    requestParams.append('query', searchParams.course_query);
-  requestParams.append('limit', '10');
-  const { items: courses } = (await fetcher(
-    process.env.BASE_API_URL +
-      `/core/courses/search?${requestParams.toString()}`,
-  )) as CoursesSearchResponse;
-  const unselectedCourses =
-    courses.map((course) => `${course.department}-${course.course_number}`) ??
-    [];
-  const coursesValues = Array.from(
+export const FormWithProviders: React.FC = () => {
+  return (
+    <SWRConfigProvider>
+      <CookiesProvider>
+        <Form />
+      </CookiesProvider>
+    </SWRConfigProvider>
+  );
+};
+
+const Form: React.FC = () => {
+  const searchParams = useSearchParams();
+
+  // Fetch professors and courses based on search parameters
+  const professorsRequestParams = new URLSearchParams();
+  const professorQuery = searchParams.get('professorQuery');
+  professorQuery && professorsRequestParams.append('query', professorQuery);
+  professorsRequestParams.append('limit', '10');
+  const { data: professors } = useSWR<ProfessorsSearchResponse, Error>(
+    `/api/core/professors/search?${professorsRequestParams.toString()}`,
+  );
+  const unselectedProfessors =
+    professors?.items.map((professor) => professor.id) ?? [];
+  const professorId = searchParams.get('professor_id');
+  const professorsValues = Array.from(
     new Set(
-      searchParams.course_id
-        ? [searchParams.course_id, ...unselectedCourses]
-        : unselectedCourses,
+      professorId
+        ? [professorId, ...unselectedProfessors]
+        : unselectedProfessors,
     ),
   );
+
+  // Fetch courses based on search parameters
+  const coursesRequestParams = new URLSearchParams();
+  const courseQuery = searchParams.get('courseQuery');
+  courseQuery && coursesRequestParams.append('query', courseQuery);
+  coursesRequestParams.append('limit', '10');
+  const { data: courses } = useSWR<CoursesSearchResponse, Error>(
+    `/api/core/courses/search?${coursesRequestParams.toString()}`,
+  );
+  const unselectedCourses =
+    courses?.items.map(
+      (course) => `${course.department}-${course.course_number}`,
+    ) ?? [];
+  const courseId = searchParams.get('course_id');
+  const coursesValues = Array.from(
+    new Set(courseId ? [courseId, ...unselectedCourses] : unselectedCourses),
+  );
+
+  // Selected tags
+  const selectedTags = searchParams.getAll('tags');
+
+  // Form submission inputs for course information
+  const courseDepartment = courseId ? courseId.split('-')[0] : '';
+  const courseNumber = courseId ? courseId.split('-')[1] : '';
+
+  // Form submission
+  const [cookies] = useCookies(['csrftoken']);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
+      const data = groupByKey<FormDataEntryValue>(
+        Array.from(formData.entries()),
+      );
+      await fetcher(
+        `/api/core/users/reviews${searchParams.get('review_id') ? '/' + searchParams.get('review_id') : ''}`,
+        {
+          method: searchParams.get('review_id') ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': cookies.csrftoken ?? '',
+            Referer: process.env.NEXT_PUBLIC_BASE_URL || '',
+          },
+          body: JSON.stringify(data),
+        },
+      );
+      setSuccess(true);
+    } catch (error) {
+      if (error instanceof FetchError) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
+    }
+  };
+
+  if (success)
+    return (
+      <div className="flex h-screen flex-col items-center justify-center">
+        <p className="text-lg max-w-[400px] text-center font-semibold">
+          Thank you for reviewing Professor{' '}
+          <Link
+            className="w-fit rounded-sm text-text underline hover:text-secondary"
+            href={`/professors/${professorId}`}
+          >
+            {professorId
+              ?.split('.')
+              .map((p) => p[0].toUpperCase() + p.slice(1))
+              .join(' ')}
+          </Link>
+          ! We appreciate your feedback.
+        </p>
+        <LinkBtn className="mt-4" variant="primary" href="/profile">
+          Go to Profile
+          <ChevronRightIcon width={20} height={20} />
+        </LinkBtn>
+      </div>
+    );
 
   return (
     <main>
       <section className="mx-auto w-full max-w-content-width px-md pb-lg pt-xxl">
         <div>
           <h1 className="pb-xs max-lg:text-h3-mobile lg:text-h3-desktop">
-            Review{' '}
-            {searchParams.professor_id
-              .split('.')
-              .map((p) => p[0].toUpperCase() + p.slice(1))
-              .join(' ')}
+            Write a Review
           </h1>
           <h2 className="pb-xl text-neutral max-lg:text-h5-mobile lg:text-h5-desktop">
             Share your experience to help fellow students choose the right
@@ -76,10 +155,33 @@ export default async function Page({
         <Card className="mb-lg p-lg">
           <label>
             <p className="pb-sm">
+              Pick a Professor<span className="pl-xs text-important">*</span>
+            </p>
+            <div className="pb-lg">
+              <SearchBar
+                param="professorQuery"
+                shouldResetPageOnChange={false}
+              />
+            </div>
+            {professorsValues.length ? (
+              <FilterGroup
+                variant="radio"
+                param="professor_id"
+                values={professorsValues}
+                shouldResetPageOnChange={false}
+              />
+            ) : (
+              <p className="text-neutral">No professors found</p>
+            )}
+          </label>
+        </Card>
+        <Card className="mb-lg p-lg">
+          <label>
+            <p className="pb-sm">
               Pick a Course<span className="pl-xs text-important">*</span>
             </p>
             <div className="pb-lg">
-              <SearchBar param="course_query" shouldResetPageOnChange={false} />
+              <SearchBar param="courseQuery" shouldResetPageOnChange={false} />
             </div>
             {coursesValues.length ? (
               <FilterGroup
@@ -93,39 +195,16 @@ export default async function Page({
             )}
           </label>
         </Card>
-        <form
-          action="/professors/review/success"
-          className="flex flex-col gap-md"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-md">
           <Card className="flex flex-col gap-md p-lg">
-            <input
-              type="hidden"
-              name="review_id"
-              value={searchParams.review_id}
-            />
+            <input type="hidden" name="submit" value="true" />
             <input
               type="hidden"
               name="professor_id"
-              value={searchParams.professor_id}
+              value={searchParams.get('professor_id') ?? ''}
             />
-            <input
-              type="hidden"
-              name="course_number"
-              value={
-                searchParams.course_id
-                  ? searchParams.course_id.split('-')[1]
-                  : undefined
-              }
-            />
-            <input
-              type="hidden"
-              name="department"
-              value={
-                searchParams.course_id
-                  ? searchParams.course_id.split('-')[0]
-                  : undefined
-              }
-            />
+            <input type="hidden" name="course_number" value={courseNumber} />
+            <input type="hidden" name="department" value={courseDepartment} />
             <label className="pb-md">
               <p className="pb-sm">
                 Ease<span className="pl-xs text-important">*</span>
@@ -137,7 +216,7 @@ export default async function Page({
                 max="5"
                 list="ease-values"
                 className="w-full"
-                defaultValue={searchParams.ease ?? 3}
+                defaultValue={searchParams.get('ease') ?? 3}
                 required
               />
               <datalist className="flex justify-between" id="ease-values">
@@ -159,7 +238,7 @@ export default async function Page({
                 max="5"
                 list="quality-values"
                 className="w-full"
-                defaultValue={searchParams.quality ?? 3}
+                defaultValue={searchParams.get('quality') ?? 3}
                 required
               />
               <datalist className="flex justify-between" id="quality-values">
@@ -182,7 +261,7 @@ export default async function Page({
                   value="true"
                   type="radio"
                   defaultChecked={
-                    searchParams.take_again === true ? true : false
+                    searchParams.get('take_again') === 'true' ? true : false
                   }
                 >
                   Yes
@@ -193,7 +272,7 @@ export default async function Page({
                   value="false"
                   type="radio"
                   defaultChecked={
-                    searchParams.take_again === false ? true : false
+                    searchParams.get('take_again') === 'false' ? true : false
                   }
                 >
                   No
@@ -205,7 +284,7 @@ export default async function Page({
               <Select
                 name="grade"
                 className="w-full"
-                defaultValue={searchParams.grade ?? ''}
+                defaultValue={searchParams.get('grade') ?? ''}
               >
                 <option value="A+">A+</option>
                 <option value="A">A</option>
@@ -252,13 +331,7 @@ export default async function Page({
                     name="tags"
                     value={tag}
                     type="checkbox"
-                    defaultChecked={
-                      searchParams.tags
-                        ? Array.isArray(searchParams.tags)
-                          ? searchParams.tags?.includes(tag)
-                          : searchParams.tags === tag
-                        : false
-                    }
+                    defaultChecked={selectedTags.includes(tag)}
                   >
                     {tag}
                   </Tag>
@@ -281,7 +354,7 @@ export default async function Page({
                 minLength={40}
                 name="content"
                 className="w-full"
-                defaultValue={searchParams.review}
+                defaultValue={searchParams.get('review') ?? ''}
                 required
               />
             </label>
@@ -297,8 +370,8 @@ export default async function Page({
                   value="false"
                   type="radio"
                   defaultChecked={
-                    searchParams.is_user_anonymous
-                      ? !searchParams.is_user_anonymous
+                    searchParams.get('is_user_anonymous')
+                      ? !searchParams.get('is_user_anonymous')
                       : false
                   }
                 >
@@ -310,8 +383,8 @@ export default async function Page({
                   value="true"
                   type="radio"
                   defaultChecked={
-                    searchParams.is_user_anonymous
-                      ? searchParams.is_user_anonymous
+                    searchParams.get('is_user_anonymous')
+                      ? !!searchParams.get('is_user_anonymous')
                       : false
                   }
                 >
@@ -321,15 +394,18 @@ export default async function Page({
             </label>
           </Card>
           <Btn
-            disabled={!searchParams.course_id}
+            disabled={!courseId || !professorId}
             variant="primary"
             type="submit"
             className="justify-center text-center"
           >
             Submit Review
           </Btn>
+          {error && (
+            <p className="w-full text-center text-important">{error}</p>
+          )}
         </form>
       </section>
     </main>
   );
-}
+};
