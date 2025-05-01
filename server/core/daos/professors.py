@@ -134,3 +134,26 @@ def professor_select_highest_rated(limit: int, minimum_reviews: int = 50):
         LIMIT %s
     """
     return fetchall(query, minimum_reviews, limit)
+
+"""
+    Search for professor based on id
+    Args:
+        id: string - professor id
+        limit: int - the number of results to return per page; only effective if page is also provided
+        page: int - the 1-indexed page number; only effective if limit is also provided
+
+    Returns:
+        out: List[dict] - A list of professors
+"""
+def professor_search_by_id(
+    id: str, page: int = None, limit: int = None
+):
+    sql_query = f"""
+        SELECT id, name, email FROM users
+        WHERE is_professor = true AND
+        id='{id}'
+    """
+    if page and limit:
+        sql_query += f" LIMIT {limit} OFFSET {(page - 1 ) * limit}"
+
+    return fetchall(sql_query)

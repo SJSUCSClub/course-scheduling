@@ -2,3 +2,4 @@
 client_secret.json
 createdb.sql
 certbot/
+.DS_Store
