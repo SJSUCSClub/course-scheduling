@@ -6,7 +6,6 @@ from core.daos.users import users_insert
 from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update, export_table_to_csv
 from core.daos.reviews import process_tags
 from collections import defaultdict
-from admin.etl.scrapers.department_scrapping import departments_scraper
 from admin.helper import get_professor_info, validate_is_sjsu
 
 
@@ -180,8 +179,14 @@ def export_schedules_to_csv(export_path:str):
 def insert_department(abbr_dept:str, name:str ):
     return insert(table_name="departments",data={"abbr_dept":abbr_dept,"name":name})
 
+def insert_course(course_number:str,course_title:str,department:str,satisfies_area:str, units:str):
+    return insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department, "satisfies_area":satisfies_area,"units":units}) 
+
 def check_department_exists(abbr_dept:str):
     return departments_search_by_filters(abbr_dept=abbr_dept)
+
+def check_course_exists(department:str,course_number:str):
+    return course_search_by_filters(department=department,course_number=course_number)#checking if course exists
 
 def update_schedule(
         term: str,
@@ -199,12 +204,11 @@ def update_schedule(
         satisfies_area:str,
         professor_email:str,
         department: str,
-        course_title: str
 ):
     professor_info = get_professor_info(professor_email=professor_email)#grab professor info
 
     professor = professor_search_by_id(id=professor_info["professor_id"])#checking of professor exists
-    course = course_search_by_filters(department=department,course_number=course_number)#checking if course exists
+    #course = course_search_by_filters(department=department,course_number=course_number)#checking if course exists
     schedules = {
             "term":term,
             "year":year,
@@ -227,8 +231,8 @@ def update_schedule(
             users_insert(name=professor_info["full_name"],id=professor_info["professor_id"],email=professor_email,is_professor=True)
             schedules['professor_id'] = professor_info['professor_id']
 
-    if not course:#no course exists then insert new course
-        insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department})
+    #if not course:#no course exists then insert new course
+    #    insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department})
     return insert(table_name="schedules",data=schedules)
 
 

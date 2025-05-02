@@ -17,7 +17,9 @@ from admin.daos.admins import (
     remove_previous_schedules,
     export_schedules_to_csv,
     check_department_exists,
-    insert_department
+    insert_department,
+    check_course_exists,
+    insert_course,
 )
 import math
 
@@ -99,10 +101,16 @@ def update_schedules(schedules,file):
         for data in update_schedules:
             if data['section'] == 'None':#this only happens for 3 classes class ID:  48997, 49390, 47712  
                 continue
-            
-            if not check_department_exists(data['department']):
-                department_name = scrape_departments(data['department'])
-                insert_department(abbr_dept=data['department'],name=department_name)
+            abbr_dept = data['department']
+            course_number = data['course']
+
+            if not check_department_exists(abbr_dept=abbr_dept):
+                department_name = scrape_departments(abbr_dept=abbr_dept)
+                insert_department(abbr_dept=abbr_dept,name=department_name)
+
+            if not check_course_exists(department=abbr_dept,course_number=course_number):
+                print("COURSE_NUMBER:",course_number)
+                insert_course(course_number=course_number,course_title=data['course_title'],department=abbr_dept, satisfies_area=data['satisfies'],units=data['units'])
 
             update_schedule(
                 term=data['term'],
@@ -119,8 +127,7 @@ def update_schedules(schedules,file):
                 mode_of_instruction=data['mode_of_instruction'],
                 satisfies_area=data['satisfies'],
                 professor_email= data['instructorEmail'],
-                department=data['department'],
-                course_title=data['course_title']
+                department=data['department']
                 )
         return {"message":"Successfully updated schedules"}
     except Exception as e:
