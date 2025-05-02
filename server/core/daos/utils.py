@@ -105,3 +105,11 @@ def delete(table_name: str, where: dict):
 def get(table_name: str, where: dict):
     query = f"SELECT * FROM {table_name} {to_where(**where)}"
     return fetchall(query, *list(where.values()))
+
+#Export any table as a csv
+def export_table_to_csv(table_name: str, export_path: str):
+    with connection.cursor() as cursor:
+        with open(export_path, 'w') as f:
+            copy = f"COPY {table_name} TO STDOUT WITH CSV HEADER"
+            cursor.copy_expert(copy,f);
+    return {"message":"copy sucessful"}

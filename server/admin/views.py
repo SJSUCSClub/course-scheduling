@@ -1,4 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
+from admin.etl.scrapers.schedule_scraping import SJSUScraper
+from .helper import validate_is_sjsu, generate_file_name, get_professor_info
+from core.daos.professors import professor_search_by_id,professor_search_by_last_name
 from authentication.permissions import (
     AuthenticatedPermission,
     AdminPermission,
@@ -19,6 +22,7 @@ from admin.services.admins import (
     manage_flagged_review,
     manage_flagged_comment,
     get_admins_list,
+    update_schedules,
 )
 
 
@@ -100,3 +104,25 @@ def list_view(request):
     )
 
     return JsonResponse(json_data)
+
+#Admin must pass in url, term, and year
+#url should use "https://www.sjsu.edu/classes/schedules/fall-2025.php"
+@api_view(["POST"])
+@permission_classes([AuthenticatedPermission, ModeratorPermission])
+@try_response
+def update_schedule_view(request):
+    data = validate_body(request)
+    url = data['url']
+    term = data['term']
+    year = data['year']
+    if not validate_is_sjsu(url):
+        return JsonResponse({"message":"bad input url"})
+    file = generate_file_name()
+
+    scraper = SJSUScraper(url, term, year)
+    content = scraper.getHTML()
+    schedules = scraper.parseHTML(content)
+
+    json_data = update_schedules(schedules=schedules,file=file)
+    return JsonResponse(json_data)
+ 

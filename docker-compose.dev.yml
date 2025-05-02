@@ -52,6 +52,9 @@ services:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY?REQUIRED}
       - REDIRECT_URI=${REDIRECT_URI?REQUIRED}
       - DEBUG=true
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID?REQUIRED}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY?REQUIRED}
+      - AWS_REGION=${AWS_REGION?REQUIRED}
     depends_on:
       db:
         condition: service_healthy

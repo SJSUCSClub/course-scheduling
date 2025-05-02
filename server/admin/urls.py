@@ -9,4 +9,6 @@ urlpatterns = [
     path("comments/<int:comment_id>/manage", views.manage_comment_view),
     path("manage-moderator", views.manage_moderator_view),
     path("list", views.list_view),
+    path("update-schedule",views.update_schedule_view),
+    
 ]

@@ -1,3 +1,7 @@
+from core.daos.utils import  update, delete, insert, export_table_to_csv
+import time
+from core.daos.schedules import schedule_select
+from .s3 import upload_to_bucket, enforce_s3_limit
 from admin.daos.admins import (
     admin_select,
     admin_select_counts,
@@ -11,6 +15,8 @@ from admin.daos.admins import (
     keep__flagged_review,
     remove_flagged_comment,
     keep__flagged_comment,
+    update_schedule,
+    remove_previous_schedules,
 )
 import math
 
@@ -78,3 +84,42 @@ def get_admins_list(
         "page": page,
         "items": items,
     }
+
+def update_schedules(schedules,file):
+    try:
+        update_schedules=[]
+        for schedule in schedules:
+            schedules_dict={k: v for k, v in schedule}
+            update_schedules.append(schedules_dict)
+        file_path = "./"
+        bucket_name='course-scheduling-previous-schedules'
+        export_table_to_csv("schedules",file_path+file)
+        upload_to_bucket(bucket_name=bucket_name,file_path=file_path,file=file)
+        enforce_s3_limit(limit=5, bucket_name=bucket_name)
+        remove_previous_schedules()
+        for data in update_schedules:
+            if data['section'] == 'None':#this only happens for 3 classes class ID:  48997, 49390, 47712  
+                continue
+           
+            update_schedule(
+                term=data['term'],
+                year=data['year'],
+                class_number=data['class_number'],
+                course_number=data['course'],
+                section=str(int(data['section'])),
+                days=data['days'],
+                dates=data['dates'],
+                times=data['times'],
+                class_type=data['class_type'],
+                units=data['units'],
+                location=data['location'],
+                mode_of_instruction=data['mode_of_instruction'],
+                satisfies_area=data['satisfies'],
+                professor_email= data['instructorEmail'],
+                department=data['department'],
+                course_title=data['course_title']
+                )
+        return {"message":"Successfully updated schedules"}
+    except Exception as e:
+        return {"message":f"Error while updating schedules: {str(e)}"}
+
