@@ -1,7 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from admin.etl.scrapers.schedule_scraping import SJSUScraper
-from .helper import validate_is_sjsu, generate_file_name, get_professor_info
-from core.daos.professors import professor_search_by_id,professor_search_by_last_name
+from .helper import validate_is_sjsu, generate_file_name, scrape_schedules
 from authentication.permissions import (
     AuthenticatedPermission,
     AdminPermission,
@@ -114,14 +112,12 @@ def update_schedule_view(request):
     data = validate_body(request)
     url = data['url']
     term = data['term']
-    year = data['year']
+    year = str(data['year'])
     if not validate_is_sjsu(url):
         return JsonResponse({"message":"bad input url"})
-    file = generate_file_name()
 
-    scraper = SJSUScraper(url, term, year)
-    content = scraper.getHTML()
-    schedules = scraper.parseHTML(content)
+    file = generate_file_name()
+    schedules = scrape_schedules(url=url,term=term,year=year)
 
     json_data = update_schedules(schedules=schedules,file=file)
     return JsonResponse(json_data)

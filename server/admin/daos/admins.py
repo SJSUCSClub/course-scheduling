@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from core.daos.courses import course_search_by_filters
 from core.daos.departments import departments_search_by_filters
-from core.daos.professors import professor_search_by_id, professor_search_by_last_name
+from core.daos.professors import professor_search_by_id 
 from core.daos.users import users_insert
-from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update 
+from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update, export_table_to_csv
 from core.daos.reviews import process_tags
 from collections import defaultdict
 from admin.etl.scrapers.department_scrapping import departments_scraper
@@ -174,6 +174,15 @@ def keep__flagged_comment(comment_id: int):
 def remove_previous_schedules():
     return delete(table_name="schedules",where={"1":"1"})
 
+def export_schedules_to_csv(export_path:str):
+    return export_table_to_csv(table_name="schedules",export_path=export_path)
+
+def insert_department(abbr_dept:str, name:str ):
+    return insert(table_name="departments",data={"abbr_dept":abbr_dept,"name":name})
+
+def check_department_exists(abbr_dept:str):
+    return departments_search_by_filters(abbr_dept=abbr_dept)
+
 def update_schedule(
         term: str,
         year: int,
@@ -195,8 +204,7 @@ def update_schedule(
     professor_info = get_professor_info(professor_email=professor_email)#grab professor info
 
     professor = professor_search_by_id(id=professor_info["professor_id"])#checking of professor exists
-    course= course_search_by_filters(department=department,course_number=course_number)#checking if course exists
-    dep= departments_search_by_filters(abbr_dept=department)#checking if department exists
+    course = course_search_by_filters(department=department,course_number=course_number)#checking if course exists
     schedules = {
             "term":term,
             "year":year,
@@ -218,12 +226,6 @@ def update_schedule(
     elif validate_is_sjsu(professor_email) and not professor:#insert new professor
             users_insert(name=professor_info["full_name"],id=professor_info["professor_id"],email=professor_email,is_professor=True)
             schedules['professor_id'] = professor_info['professor_id']
-
-    if not dep:#no department exists then insert new department
-        dep_scrapper =departments_scraper(department_tag=department)#scrap to get the department full name
-        content = dep_scrapper.getHTML()
-        dep_name = dep_scrapper.parseHTML(content)
-        insert(table_name="departments",data={"abbr_dept":department,"name":str(dep_name[1])})
 
     if not course:#no course exists then insert new course
         insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department})

@@ -1,7 +1,5 @@
-from core.daos.utils import  update, delete, insert, export_table_to_csv
-import time
-from core.daos.schedules import schedule_select
-from .s3 import upload_to_bucket, enforce_s3_limit
+from .s3 import upload_to_bucket 
+from admin.helper import scrape_departments
 from admin.daos.admins import (
     admin_select,
     admin_select_counts,
@@ -17,6 +15,9 @@ from admin.daos.admins import (
     keep__flagged_comment,
     update_schedule,
     remove_previous_schedules,
+    export_schedules_to_csv,
+    check_department_exists,
+    insert_department
 )
 import math
 
@@ -89,18 +90,20 @@ def update_schedules(schedules,file):
     try:
         update_schedules=[]
         for schedule in schedules:
-            schedules_dict={k: v for k, v in schedule}
-            update_schedules.append(schedules_dict)
+            update_schedules.append(schedule.dict())
         file_path = "./"
         bucket_name='course-scheduling-previous-schedules'
-        export_table_to_csv("schedules",file_path+file)
+        export_schedules_to_csv(export_path=file_path+file)
         upload_to_bucket(bucket_name=bucket_name,file_path=file_path,file=file)
-        enforce_s3_limit(limit=5, bucket_name=bucket_name)
         remove_previous_schedules()
         for data in update_schedules:
             if data['section'] == 'None':#this only happens for 3 classes class ID:  48997, 49390, 47712  
                 continue
-           
+            
+            if not check_department_exists(data['department']):
+                department_name = scrape_departments(data['department'])
+                insert_department(abbr_dept=data['department'],name=department_name)
+
             update_schedule(
                 term=data['term'],
                 year=data['year'],
