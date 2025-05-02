@@ -6,7 +6,6 @@ from core.daos.users import users_insert
 from core.daos.utils import fetchone, fetchall, insert, delete, to_where, update, export_table_to_csv
 from core.daos.reviews import process_tags
 from collections import defaultdict
-from admin.helper import get_professor_info, validate_is_sjsu
 
 
 def admin_select(
