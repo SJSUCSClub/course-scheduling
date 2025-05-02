@@ -22,6 +22,7 @@ services:
     environment:
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL?REQUIRED}
       - BASE_API_URL=${BASE_API_URL?REQUIRED}
+      - ENABLE_HOT_RELOAD_POLLING=${ENABLE_HOT_RELOAD_POLLING}
     volumes:
       - ./client:/app
       - /app/node_modules
