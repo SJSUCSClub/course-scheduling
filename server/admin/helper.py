@@ -27,7 +27,6 @@ def get_professor_info(professor_email):
     professor_full_name = professor_first_name+ " "+ professor_last_name
     return {"professor_email":professor_email,
             "professor_id":professor_id,
-            "last_name":professor_last_name,
             "full_name":professor_full_name}
 
 def scrape_schedules(url:str,term:str,year:str):

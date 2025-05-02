@@ -1,5 +1,5 @@
 from .s3 import upload_to_bucket 
-from admin.helper import scrape_departments
+from admin.helper import scrape_departments, get_professor_info, validate_is_sjsu
 from admin.daos.admins import (
     admin_select,
     admin_select_counts,
@@ -20,6 +20,8 @@ from admin.daos.admins import (
     insert_department,
     check_course_exists,
     insert_course,
+    check_professor_exists,
+    insert_professor,
 )
 import math
 
@@ -98,19 +100,28 @@ def update_schedules(schedules,file):
         export_schedules_to_csv(export_path=file_path+file)
         upload_to_bucket(bucket_name=bucket_name,file_path=file_path,file=file)
         remove_previous_schedules()
+
         for data in update_schedules:
-            if data['section'] == 'None':#this only happens for 3 classes class ID:  48997, 49390, 47712  
+            if data["section"] == 'None':#this only happens for 3 classes class ID:  48997, 49390, 47712  
                 continue
-            abbr_dept = data['department']
-            course_number = data['course']
+            professor_info = get_professor_info(data["instructorEmail"])
+            abbr_dept = data["department"]
+            course_number = data["course"]
 
             if not check_department_exists(abbr_dept=abbr_dept):
                 department_name = scrape_departments(abbr_dept=abbr_dept)
                 insert_department(abbr_dept=abbr_dept,name=department_name)
 
             if not check_course_exists(department=abbr_dept,course_number=course_number):
-                print("COURSE_NUMBER:",course_number)
-                insert_course(course_number=course_number,course_title=data['course_title'],department=abbr_dept, satisfies_area=data['satisfies'],units=data['units'])
+                insert_course(course_number=course_number,course_title=data["course_title"],department=abbr_dept, satisfies_area=data["satisfies"],units=data["units"])
+
+            professor_exists= check_professor_exists(professor_id=professor_info["professor_id"])
+            professor_id=""
+            if professor_exists:
+                professor_id = professor_exists[0]["id"]
+            elif validate_is_sjsu(val=data["instructorEmail"]) and not professor_exists:
+                insert_professor(professor_info["full_name"],professor_info["professor_id"],data["instructorEmail"])
+                professor_id = professor_info["professor_id"]
 
             update_schedule(
                 term=data['term'],
@@ -126,7 +137,7 @@ def update_schedules(schedules,file):
                 location=data['location'],
                 mode_of_instruction=data['mode_of_instruction'],
                 satisfies_area=data['satisfies'],
-                professor_email= data['instructorEmail'],
+                professor_id= professor_id,
                 department=data['department']
                 )
         return {"message":"Successfully updated schedules"}

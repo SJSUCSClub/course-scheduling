@@ -173,20 +173,35 @@ def keep__flagged_comment(comment_id: int):
 def remove_previous_schedules():
     return delete(table_name="schedules",where={"1":"1"})
 
+
+
 def export_schedules_to_csv(export_path:str):
     return export_table_to_csv(table_name="schedules",export_path=export_path)
+
 
 def insert_department(abbr_dept:str, name:str ):
     return insert(table_name="departments",data={"abbr_dept":abbr_dept,"name":name})
 
+
 def insert_course(course_number:str,course_title:str,department:str,satisfies_area:str, units:str):
     return insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department, "satisfies_area":satisfies_area,"units":units}) 
+
+
+def insert_professor(name:str,id:str,email:str):
+    return users_insert(name=name,id=id,email=email,is_professor=True)
+
 
 def check_department_exists(abbr_dept:str):
     return departments_search_by_filters(abbr_dept=abbr_dept)
 
+
 def check_course_exists(department:str,course_number:str):
     return course_search_by_filters(department=department,course_number=course_number)#checking if course exists
+
+
+def check_professor_exists(professor_id:str):
+    return professor_search_by_id(id=professor_id)
+
 
 def update_schedule(
         term: str,
@@ -202,38 +217,14 @@ def update_schedule(
         location: str,
         mode_of_instruction: str,
         satisfies_area:str,
-        professor_email:str,
+        professor_id:str,
         department: str,
 ):
-    professor_info = get_professor_info(professor_email=professor_email)#grab professor info
+    args = locals()
+    if args['professor_id'] == "":
+        args.pop('professor_id')
 
-    professor = professor_search_by_id(id=professor_info["professor_id"])#checking of professor exists
-    #course = course_search_by_filters(department=department,course_number=course_number)#checking if course exists
-    schedules = {
-            "term":term,
-            "year":year,
-            "class_number":class_number,
-            "course_number":course_number,
-            "section":section,
-            "days":days,
-            "dates":dates,
-            "times":times,
-            "class_type":class_type,
-            "units":units,
-            "location":location,
-            "mode_of_instruction":mode_of_instruction,
-            "satisfies_area":satisfies_area,
-            "department":department,
-            }
-    if professor:#professor exists already 
-        schedules['professor_id'] = professor[0]['id']
-    elif validate_is_sjsu(professor_email) and not professor:#insert new professor
-            users_insert(name=professor_info["full_name"],id=professor_info["professor_id"],email=professor_email,is_professor=True)
-            schedules['professor_id'] = professor_info['professor_id']
-
-    #if not course:#no course exists then insert new course
-    #    insert(table_name="courses",data={"course_number":course_number,"name":course_title,"department":department})
-    return insert(table_name="schedules",data=schedules)
+    return insert(table_name="schedules",data=args)
 
 
 
