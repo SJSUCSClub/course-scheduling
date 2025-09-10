@@ -1,4 +1,7 @@
 from core.daos.schedules import schedule_select
+from admin.etl.scrapers.schedule_scraping import SJSUScraper
+from admin.etl.scrapers.department_scrapping import departments_scraper
+
 import re
 
 #generate csv file name based current schedule values before update
@@ -24,5 +27,16 @@ def get_professor_info(professor_email):
     professor_full_name = professor_first_name+ " "+ professor_last_name
     return {"professor_email":professor_email,
             "professor_id":professor_id,
-            "last_name":professor_last_name,
             "full_name":professor_full_name}
+
+def scrape_schedules(url:str,term:str,year:str):
+    scraper = SJSUScraper(url, term, year)
+    content = scraper.getHTML()
+    schedules = scraper.parseHTML(content)
+    return schedules
+
+def scrape_departments(abbr_dept:str):
+    dep_scrapper = departments_scraper(department_tag=abbr_dept)#scrap to get the department full name
+    content = dep_scrapper.getHTML()
+    dep_name = dep_scrapper.parseHTML(content)
+    return dep_name
