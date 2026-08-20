@@ -2,10 +2,12 @@ services:
   nginx:
     image: nginx:latest
     ports:
+      - "80:80"
       - "443:443"
     volumes:
       - ./nginx.staging.conf:/etc/nginx/nginx.conf:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./certbot/www/:/var/www/certbot/:ro
     depends_on:
       server:
         condition: service_healthy
