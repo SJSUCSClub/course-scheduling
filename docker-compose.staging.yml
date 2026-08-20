@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:latest
+    container_name: lenses-nginx
     ports:
       - "80:80"
       - "443:443"
